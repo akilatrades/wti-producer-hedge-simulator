@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="560" viewBox="0 0 1000 560">
+  <rect width="100%" height="100%" fill="white"/>
+  <text x="500" y="34" text-anchor="middle" font-family="Arial" font-size="24" font-weight="700">WTI Producer Hedge Effectiveness</text>
+  <text x="500" y="57" text-anchor="middle" font-family="Arial" font-size="14" fill="#555">Variance reduction in monthly revenue surprise, Feb 2015–Jul 2026</text><line x1="95" y1="470" x2="960" y2="470" stroke="#e5e7eb"/>
+        <text x="83" y="475" text-anchor="end" font-family="Arial" font-size="13" fill="#555">0%</text><line x1="95" y1="390" x2="960" y2="390" stroke="#e5e7eb"/>
+        <text x="83" y="395" text-anchor="end" font-family="Arial" font-size="13" fill="#555">20%</text><line x1="95" y1="310" x2="960" y2="310" stroke="#e5e7eb"/>
+        <text x="83" y="315" text-anchor="end" font-family="Arial" font-size="13" fill="#555">40%</text><line x1="95" y1="230" x2="960" y2="230" stroke="#e5e7eb"/>
+        <text x="83" y="235" text-anchor="end" font-family="Arial" font-size="13" fill="#555">60%</text><line x1="95" y1="150" x2="960" y2="150" stroke="#e5e7eb"/>
+        <text x="83" y="155" text-anchor="end" font-family="Arial" font-size="13" fill="#555">80%</text><line x1="95" y1="70" x2="960" y2="70" stroke="#e5e7eb"/>
+        <text x="83" y="75" text-anchor="end" font-family="Arial" font-size="13" fill="#555">100%</text><rect x="160" y="469.9999999999999" width="95" height="8.881784197001252e-14" rx="5" fill="#2563eb"/>
+        <text x="207.5" y="459.9999999999999" text-anchor="middle" font-family="Arial" font-size="14" font-weight="700">0.0%</text>
+        <text x="207.5" y="500" text-anchor="middle" font-family="Arial" font-size="14">0% hedge</text><rect x="320" y="300.79374871682523" width="95" height="169.20625128317477" rx="5" fill="#2563eb"/>
+        <text x="367.5" y="290.79374871682523" text-anchor="middle" font-family="Arial" font-size="14" font-weight="700">42.3%</text>
+        <text x="367.5" y="500" text-anchor="middle" font-family="Arial" font-size="14">25% hedge</text><rect x="480" y="180.40796994497197" width="95" height="289.59203005502803" rx="5" fill="#2563eb"/>
+        <text x="527.5" y="170.40796994497197" text-anchor="middle" font-family="Arial" font-size="14" font-weight="700">72.4%</text>
+        <text x="527.5" y="500" text-anchor="middle" font-family="Arial" font-size="14">50% hedge</text><rect x="640" y="108.84266368444014" width="95" height="361.15733631555986" rx="5" fill="#2563eb"/>
+        <text x="687.5" y="98.84266368444014" text-anchor="middle" font-family="Arial" font-size="14" font-weight="700">90.3%</text>
+        <text x="687.5" y="500" text-anchor="middle" font-family="Arial" font-size="14">75% hedge</text><rect x="800" y="86.0978299352297" width="95" height="383.9021700647703" rx="5" fill="#2563eb"/>
+        <text x="847.5" y="76.0978299352297" text-anchor="middle" font-family="Arial" font-size="14" font-weight="700">96.0%</text>
+        <text x="847.5" y="500" text-anchor="middle" font-family="Arial" font-size="14">100% hedge</text><text x="24" y="270" transform="rotate(-90 24 270)" text-anchor="middle" font-family="Arial" font-size="14">Hedge effectiveness</text>
+  <text x="500" y="532" text-anchor="middle" font-family="Arial" font-size="12" fill="#666">Effectiveness = 1 − Var(hedged revenue surprise) / Var(unhedged revenue surprise)</text>
+  </svg>
