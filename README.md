@@ -2,7 +2,7 @@
 
 I trade futures, and I built this project because I wanted to understand how the same market can be used by an oil producer to protect revenue.
 
-You do not need to know anything about futures, oil trading, hedging, Midland, or Cushing to follow this project. I explain each part below.
+You don't need a background in futures or physical energy trading to follow this project. I explain the concepts as they come up.
 
 The example is a crude oil producer that expects to sell 100,000 barrels of oil each month.
 
