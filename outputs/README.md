@@ -1,29 +1,33 @@
 # Historical Results
 
-These are the saved results from the model.
+This folder holds the saved charts and result files from the model.
 
-The sample runs from **February 2015 through July 2026**, and I assume the producer sells **100,000 barrels per month**.
+The sample runs from February 2015 through July 2026. The example producer sells 100,000 barrels per month.
 
-## Hedge results
+## Main hedge results
 
-I wanted to see how much the futures hedge could keep monthly revenue closer to what the producer expected at the start of the month.
+The basic question is whether the futures hedge keeps revenue closer to what the producer expected.
 
-I call that difference **revenue surprise**. The smaller it is, the more stable the revenue is.
+I measure that difference as revenue surprise.
 
-The main files are `hedge_ratio_summary.csv`, `monthly_analysis.csv`, `hedge_effectiveness.svg`, and `revenue_surprise_history.svg`.
+If the revenue surprise is smaller, the hedge did a better job of reducing uncertainty.
 
-## Midland vs. Cushing basis test
+The main files for this section are `hedge_ratio_summary.csv`, `monthly_analysis.csv`, `hedge_effectiveness.svg`, and `revenue_surprise_history.svg`.
 
-I also tested what happens if Midland crude gets cheaper relative to Cushing.
+## Midland and Cushing basis test
 
-In the example, the producer expects a Midland basis of **-$1/bbl**, but it ends up at **-$5/bbl**. That is a $4/bbl move against the producer.
+This test looks at what happens when Midland crude gets cheaper relative to Cushing.
 
-On 100,000 barrels, that creates a **$400,000 shortfall** with no basis hedge. A 50% basis hedge cuts it to about **$200,000**. In the simplified model, a full basis hedge offsets the move.
+The producer expects Midland to trade $1 below Cushing, but the difference later widens to $5 below Cushing. That is a $4 per barrel move against the producer.
 
-The related files are `basis_risk_scenarios.csv` and `basis_risk_stress.svg`.
+On 100,000 barrels, the difference is $400,000.
+
+With no basis hedge, the full $400,000 remains. With a 50% basis hedge, about $200,000 remains. In this simplified model, a full basis hedge offsets the move.
+
+The files for this section are `basis_risk_scenarios.csv` and `basis_risk_stress.svg`.
 
 ## Hedge-size estimate
 
-The project also estimates the hedge size that reduced price risk the most in the historical sample.
+I also used the historical relationship between WTI spot and futures prices to estimate the hedge size that reduced price movement the most.
 
 Those results are in `min_variance_summary.csv`, `min_variance_comparison.csv`, `min_variance_comparison.svg`, `rolling_min_variance_ratio.csv`, and `rolling_min_variance_ratio.svg`.
