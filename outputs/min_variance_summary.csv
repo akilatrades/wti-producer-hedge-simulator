@@ -1,0 +1,9 @@
+metric,value
+observations,137
+spot_futures_change_correlation,0.982802
+static_min_variance_hedge_ratio,1.015883
+rounded_cl_contracts_for_100000_bbl,102
+rounded_hedge_ratio,1.0200
+unhedged_monthly_price_change_std,7.290783
+rounded_optimal_residual_std,1.346640
+rounded_optimal_variance_reduction,0.965884
