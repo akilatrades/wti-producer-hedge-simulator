@@ -1,16 +1,16 @@
 # WTI Producer Hedge Simulator
 
-I built this project to connect futures trading with a real energy problem.
+I built this project because I wanted to connect the way I think about futures with a real energy-market problem.
 
-The setup is simple: assume a crude oil producer expects to sell **100,000 barrels per month**. If oil prices fall before that oil is sold, revenue falls too. I wanted to see how much of that risk could be reduced by shorting WTI futures.
+The example is a crude producer selling 100,000 barrels per month. The producer knows the oil will be sold later, so there is price risk between now and then. I wanted to see how much of that risk could be reduced with WTI futures, and what kinds of risk would still remain after the hedge was in place.
 
-## What I tested
+## Hedge comparison
 
-I started by comparing a few simple hedge sizes: 0%, 25%, 50%, 75%, and 100% of expected production.
+I started with a straightforward comparison of five hedge levels: 0%, 25%, 50%, 75%, and 100% of expected production.
 
-For each one, I combined the producer's physical oil revenue with the profit or loss from the futures hedge. Then I compared how stable the total revenue was.
+For each hedge level, I combined the producer's physical oil revenue with the gain or loss on the futures position. I then compared how much total monthly revenue moved around.
 
-Using historical data from **February 2015 through July 2026**, I got these results:
+The historical sample runs from February 2015 through July 2026.
 
 | Hedge ratio | CL contracts short | Revenue volatility | Hedge effectiveness |
 |---:|---:|---:|---:|
@@ -20,70 +20,66 @@ Using historical data from **February 2015 through July 2026**, I got these resu
 | 75% | 75 | $221,653 | 90.3% |
 | 100% | 100 | $142,693 | 96.0% |
 
-The main takeaway was pretty clear. In this sample, a **75% hedge cut modeled revenue risk by about 90%**. A full hedge reduced it by about **96%**.
+In this sample, the 75% hedge reduced modeled revenue risk by about 90%. The 100% hedge reduced it by about 96%.
 
 ![Hedge effectiveness](outputs/hedge_effectiveness.svg)
 
 ![Revenue surprise](outputs/revenue_surprise_history.svg)
 
-## Finding a better hedge size
+## Hedge sizing from the data
 
-After testing fixed hedge sizes, I wanted to see what the data itself would suggest.
+After comparing fixed hedge levels, I wanted to see what the historical relationship between spot and futures prices would suggest.
 
-I used the historical relationship between WTI spot prices and WTI futures prices to estimate a hedge size that would have reduced price swings the most.
+I estimated a minimum-variance hedge ratio using WTI spot and futures price changes. The result was 1.016, which works out to roughly 102 CL contracts for 100,000 barrels of production.
 
-That estimate came out to **1.016**, which is about **102 CL contracts** for 100,000 barrels of production.
-
-Using that hedge size reduced monthly price-change variance by about **96.6%** in the sample.
+That hedge size reduced monthly price-change variance by about 96.6% in the sample.
 
 ![Minimum-variance comparison](outputs/min_variance_comparison.svg)
 
-I also looked at the hedge ratio over rolling 24-month periods. It moved over time, which makes sense because market relationships are not always constant.
+I also calculated the same hedge ratio over rolling 24-month windows. The result moved over time, which is useful because the relationship between spot and futures prices is not perfectly stable.
 
 ![Rolling minimum-variance hedge ratio](outputs/rolling_min_variance_ratio.svg)
 
-I would not treat 102 contracts as a real-world recommendation. A real trading or risk desk would also have to think about production uncertainty, hedge limits, liquidity, accounting rules, and company risk policy.
+I would not use 102 contracts as a real-world recommendation by itself. A producer would also have to consider expected production, company hedge limits, liquidity, accounting treatment, and internal risk policy.
 
-## Midland vs. Cushing basis risk
+## Midland and Cushing basis risk
 
-The next piece I wanted to understand was basis risk.
+The next part of the project looks at basis risk.
 
-A producer may sell crude in **Midland, Texas** while using WTI futures tied to **Cushing, Oklahoma**. Those two prices are related, but they are not always the same.
+A producer may sell crude in Midland while hedging with WTI futures tied to Cushing. Those prices are related, but they do not always move by the same amount.
 
-In this model:
+In this project:
 
 ```text
 Midland basis = Midland price - Cushing price
 ```
 
-So even if the producer hedges the main WTI price move, the Midland price can still weaken compared with Cushing.
+I used a simple stress test to show what happens if that difference moves against the producer.
 
-Here is the example I used. The producer expects Midland to trade at **-$1/bbl** versus Cushing, but the actual basis ends up at **-$5/bbl**. That is a **$4/bbl move against the producer**.
-
-On 100,000 barrels, that works out to:
+If the producer expects Midland to trade $1 below Cushing, but the actual difference widens to $5 below Cushing, the producer is $4 per barrel worse off than expected. On 100,000 barrels, that is a $400,000 difference.
 
 ```text
 $4 × 100,000 barrels = $400,000
 ```
 
-With no basis hedge, the modeled shortfall is $400,000. With a 50% basis hedge, it drops to about $200,000. In the simplified model, a full basis hedge offsets that move.
+With no basis hedge, the full $400,000 remains. A 50% basis hedge cuts that amount to about $200,000. In the simplified model, a full basis hedge offsets the move.
 
 ![Midland-Cushing basis risk stress test](outputs/basis_risk_stress.svg)
 
-This part is a stress-test example, not a historical Midland cash-price backtest.
+This section is a scenario test, not a historical Midland cash-price backtest.
 
-For background on the pricing and the use of Midland differential hedges:
+For background:
 
 - [EIA: WTI Cushing spot-market definition](https://www.eia.gov/dnav/pet/TblDefs/pet_pri_spt_tbldef2.asp)
 - [SEC/EOG disclosure: Midland Differential basis swaps](https://www.sec.gov/Archives/edgar/data/821189/000082118919000020/a2019033110-q.htm)
 
 ## How the hedge works
 
-A producer is naturally exposed to falling oil prices because it owns future production.
+A crude producer is naturally exposed to falling oil prices because the producer owns future production.
 
-If the producer shorts WTI futures and oil prices fall, the physical oil is worth less, but the short futures position gains. If oil prices rise, the physical oil is worth more, but the futures hedge loses.
+If the producer shorts WTI futures and oil prices fall, the physical oil is worth less, but the short futures position gains. If oil prices rise, the physical oil is worth more, while the futures hedge loses.
 
-The point is not to make the most money on the futures trade. The point is to make total revenue less sensitive to oil-price swings.
+The purpose of the hedge is not to make money from the futures trade on its own. It is to make the producer's overall revenue less sensitive to oil-price moves.
 
 The basic math is:
 
@@ -99,53 +95,51 @@ Total revenue =
 physical oil revenue + futures P&L
 ```
 
-## Why I built this
+## Why I built it
 
-I trade futures, and I wanted to take that interest beyond a directional trade and apply it to a physical energy business.
+I trade futures, and I wanted to use that experience in a way that was closer to how futures are used in the energy industry.
 
-This gave me a way to work through hedge sizing, physical revenue, futures P&L, basis risk, and risk reduction in one model.
-
-It also helped me get more comfortable using Python for a trading and risk problem instead of only looking at charts or individual trades.
+This project gave me a reason to work through physical revenue, hedge sizing, futures P&L, basis risk, and risk reduction in the same model. It also gave me more experience using Python for a market problem instead of only using charts and discretionary trade ideas.
 
 ## Data
 
 The model uses WTI Cushing spot-price data from public FRED/EIA sources and a continuous front-month WTI futures series based on Yahoo Finance ticker `CL=F`.
 
-The saved results use public mirrors of those series:
+The saved results use public copies of those series:
 
 - [WTI spot dataset](https://github.com/datasets/oil-prices)
 - [WTI futures history](https://github.com/JavierLuqueGarcia/Crude-oil-Backtest)
 
 ## Glossary
 
-| Term | What I mean by it |
+| Term | Meaning |
 |---|---|
-| **WTI** | West Texas Intermediate, a major U.S. crude oil benchmark. |
-| **CL** | NYMEX WTI crude oil futures. One CL contract represents 1,000 barrels. |
-| **Physical crude** | The actual oil the producer sells. |
-| **Futures contract** | A contract tied to the future price of oil. |
-| **Hedge** | A position used to reduce price risk. |
-| **Short futures** | Selling futures so the position can gain if oil prices fall. |
-| **Hedge ratio** | The percentage of expected production being hedged. |
-| **P&L** | Profit and loss. |
-| **Basis** | The price difference between two related crude prices or locations. |
-| **Basis risk** | The risk that those two prices do not move together. |
-| **Basis swap** | A contract used to hedge that price difference. |
-| **Cushing** | The Oklahoma delivery point tied to NYMEX WTI futures. |
-| **Midland** | A major Permian Basin crude pricing location. |
-| **Revenue surprise** | How far actual modeled revenue ends up from the starting expectation. |
-| **Hedge effectiveness** | How much the hedge reduced revenue risk. |
-| **Minimum-variance hedge ratio** | The hedge size that reduced price swings the most in the historical sample. |
-| **Volatility** | How much prices or revenue move around. |
-| **Stress test** | A simple test of what happens under a large market move. |
-| **Continuous futures series** | A price history that links multiple futures contracts together over time. |
-| **ETRM** | A system used by energy companies to track trades, positions, risk, and settlements. |
+| WTI | West Texas Intermediate, a major U.S. crude oil benchmark. |
+| CL | NYMEX WTI crude oil futures. One CL contract represents 1,000 barrels. |
+| Physical crude | The actual oil the producer sells. |
+| Futures contract | A contract tied to the future price of oil. |
+| Hedge | A position used to reduce price risk. |
+| Short futures | Selling futures so the position can gain if oil prices fall. |
+| Hedge ratio | The percentage of expected production being hedged. |
+| P&L | Profit and loss. |
+| Basis | The price difference between two related crude prices or locations. |
+| Basis risk | The risk that those two prices do not move together. |
+| Basis swap | A contract used to hedge that price difference. |
+| Cushing | The Oklahoma delivery point tied to NYMEX WTI futures. |
+| Midland | A major Permian Basin crude pricing location. |
+| Revenue surprise | The difference between expected revenue and modeled revenue. |
+| Hedge effectiveness | How much the hedge reduced revenue risk. |
+| Minimum-variance hedge ratio | The hedge size that reduced price swings the most in the historical sample. |
+| Volatility | How much prices or revenue move around. |
+| Stress test | A test of what happens under a large market move. |
+| Continuous futures series | A price history that links several futures contracts together over time. |
+| ETRM | A system used by energy companies to track trades, positions, risk, and settlements. |
 
 ## Limitations
 
 This is a portfolio model, not a live producer hedge book.
 
-The futures data is a continuous front-month series, so it does not track the exact contract a real producer would hold each month. A real implementation would also need contract roll dates, transaction costs, margin, production uncertainty, location and quality differences, and counterparty risk.
+The futures data is a continuous front-month series, so it does not track the exact contract a producer would hold each month. A real implementation would also need contract roll dates, transaction costs, margin, production uncertainty, location and quality differences, and counterparty risk.
 
 ## Project files
 
@@ -182,4 +176,4 @@ pip install -r requirements.txt
 python run_analysis.py
 ```
 
-**Disclaimer:** Educational and portfolio use only. Not investment advice.
+Educational and portfolio use only. Not investment advice.
