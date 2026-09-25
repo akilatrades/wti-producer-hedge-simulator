@@ -4,6 +4,3 @@ __pycache__/
 .ipynb_checkpoints/
 .DS_Store
 Thumbs.db
-
-outputs/*.csv
-outputs/*.png
