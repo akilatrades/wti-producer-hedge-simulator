@@ -26,6 +26,26 @@ A **75% hedge** reduced revenue-surprise variance by **90.3%** and lowered month
 
 ![Revenue surprise](outputs/revenue_surprise_history.svg)
 
+## Minimum-variance hedge ratio
+
+Instead of choosing a hedge ratio only by policy (25%, 50%, 75%, 100%), the project now estimates a **minimum-variance hedge ratio** from historical monthly WTI spot and futures price changes:
+
+```text
+h* = Cov(ΔSpot, ΔFutures) / Var(ΔFutures)
+```
+
+For the historical sample, the estimated static ratio is **1.016**. For 100,000 barrels/month, that rounds to **102 CL contracts**, or roughly **1.02× production exposure**.
+
+Monthly spot/futures changes had a correlation of **0.983**. Using the rounded minimum-variance ratio reduced monthly price-change variance by **96.6%**, with residual volatility of about **$1.35/bbl** versus **$7.29/bbl** unhedged.
+
+![Minimum-variance comparison](outputs/min_variance_comparison.svg)
+
+The model also calculates a **24-month rolling hedge ratio** to show that the statistically optimal ratio changes through time rather than remaining fixed.
+
+![Rolling minimum-variance hedge ratio](outputs/rolling_min_variance_ratio.svg)
+
+This is a statistical risk-minimization result, not a recommendation to over-hedge physical production. A commercial desk would also consider production uncertainty, hedge limits, liquidity, basis risk, accounting treatment, and risk policy.
+
 ## Basis risk extension: Midland vs Cushing
 
 A producer may sell physical crude in **Midland, Texas** while using NYMEX WTI futures referenced to **Cushing, Oklahoma**. That introduces **location basis risk**:
@@ -133,7 +153,8 @@ wti-producer-hedge-simulator/
 ├── run_analysis.py
 ├── src/
 │   ├── hedge_engine.py
-│   └── basis_risk.py
+│   ├── basis_risk.py
+│   └── min_variance.py
 ├── notebooks/
 │   └── WTI_Producer_Hedge_Simulator.ipynb
 ├── data/
@@ -145,7 +166,10 @@ wti-producer-hedge-simulator/
     ├── hedge_effectiveness.svg
     ├── revenue_surprise_history.svg
     ├── basis_risk_scenarios.csv
-    └── basis_risk_stress.svg
+    ├── basis_risk_stress.svg
+    ├── min_variance_summary.csv
+    ├── min_variance_comparison.svg
+    └── rolling_min_variance_ratio.svg
 ```
 
 ## Quick start
@@ -174,7 +198,6 @@ An institutional implementation would use contract-specific settlements, explici
 ## Next extensions
 
 - historical contract-specific Midland basis data
-- minimum-variance hedge ratio
 - rolling hedge ratios
 - WTI/Brent cross-hedging
 - producer collars and put options
