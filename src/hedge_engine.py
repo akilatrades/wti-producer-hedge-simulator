@@ -1,7 +1,6 @@
 """WTI producer hedging utilities."""
 
 from __future__ import annotations
-
 from dataclasses import dataclass
 from typing import Iterable
 
@@ -21,18 +20,23 @@ def prepare_monthly_market_data(
     spot_daily: pd.Series,
     futures_daily: pd.Series,
 ) -> pd.DataFrame:
-    """Convert daily spot/futures observations into monthly hedge periods."""
+    """Align daily WTI spot and continuous futures proxy to month-end.
+
+    The physical producer is assumed to realize the month-end WTI spot price.
+    The hedge is initiated at the prior month-end futures proxy and closed at
+    the current month-end futures proxy.
+    """
     spot = spot_daily.dropna().sort_index().astype(float)
     fut = futures_daily.dropna().sort_index().astype(float)
 
-    spot_monthly = spot.resample("ME").mean().rename("spot_avg")
+    spot_monthly = spot.resample("ME").last().rename("spot_exit")
     fut_monthly = fut.resample("ME").last().rename("futures_exit")
 
     df = pd.concat([spot_monthly, fut_monthly], axis=1).dropna()
     df["futures_entry"] = df["futures_exit"].shift(1)
     df = df.dropna()
 
-    return df[["spot_avg", "futures_entry", "futures_exit"]]
+    return df[["spot_exit", "futures_entry", "futures_exit"]]
 
 
 def simulate_hedge(
@@ -56,36 +60,42 @@ def simulate_hedge(
     out["contracts_short"] = contracts
     out["hedged_bbl"] = hedged_bbl
 
-    out["physical_revenue"] = out["spot_avg"] * production
+    out["physical_revenue"] = out["spot_exit"] * production
     out["futures_pnl"] = (
         out["futures_entry"] - out["futures_exit"]
     ) * hedged_bbl
     out["hedged_revenue"] = out["physical_revenue"] + out["futures_pnl"]
 
+    # Benchmark revenue if the full monthly volume could have been locked at
+    # the prior-month futures proxy. Revenue surprise is the residual risk.
+    out["benchmark_locked_revenue"] = out["futures_entry"] * production
+    out["revenue_surprise"] = (
+        out["hedged_revenue"] - out["benchmark_locked_revenue"]
+    )
+
     return out
 
 
-def summarize_strategy(sim: pd.DataFrame) -> dict:
-    """Summarize revenue risk for one hedge ratio."""
-    revenue = sim["hedged_revenue"]
-    physical = sim["physical_revenue"]
-
-    physical_var = physical.var(ddof=1)
-    hedged_var = revenue.var(ddof=1)
+def summarize_strategy(
+    sim: pd.DataFrame,
+    unhedged_surprise_variance: float,
+) -> dict:
+    """Summarize residual revenue risk for one hedge ratio."""
+    surprise = sim["revenue_surprise"]
 
     hedge_effectiveness = (
-        1 - hedged_var / physical_var if physical_var > 0 else np.nan
+        1 - surprise.var(ddof=1) / unhedged_surprise_variance
+        if unhedged_surprise_variance > 0
+        else np.nan
     )
 
     return {
         "hedge_ratio": float(sim["hedge_ratio"].iloc[0]),
         "contracts_short": int(sim["contracts_short"].iloc[0]),
-        "avg_monthly_revenue": float(revenue.mean()),
-        "monthly_revenue_std": float(revenue.std(ddof=1)),
-        "annualized_revenue_std": float(revenue.std(ddof=1) * np.sqrt(12)),
-        "p05_monthly_revenue": float(revenue.quantile(0.05)),
-        "minimum_monthly_revenue": float(revenue.min()),
-        "average_futures_pnl": float(sim["futures_pnl"].mean()),
+        "avg_monthly_revenue": float(sim["hedged_revenue"].mean()),
+        "revenue_surprise_std": float(surprise.std(ddof=1)),
+        "p05_revenue_surprise": float(surprise.quantile(0.05)),
+        "worst_revenue_surprise": float(surprise.min()),
         "hedge_effectiveness": float(hedge_effectiveness),
     }
 
@@ -95,13 +105,17 @@ def compare_hedge_ratios(
     hedge_ratios: Iterable[float] = (0, 0.25, 0.50, 0.75, 1.00),
     assumptions: HedgeAssumptions = HedgeAssumptions(),
 ) -> tuple[pd.DataFrame, dict[float, pd.DataFrame]]:
+    """Run the same market history across several hedge ratios."""
+    unhedged = simulate_hedge(market, 0.0, assumptions)
+    unhedged_var = unhedged["revenue_surprise"].var(ddof=1)
+
     summaries = []
     simulations = {}
 
     for ratio in hedge_ratios:
         sim = simulate_hedge(market, ratio, assumptions)
         simulations[ratio] = sim
-        summaries.append(summarize_strategy(sim))
+        summaries.append(summarize_strategy(sim, unhedged_var))
 
     return pd.DataFrame(summaries).sort_values("hedge_ratio"), simulations
 
@@ -130,6 +144,7 @@ def stress_test(
     physical_revenue = realized_spot * production
     futures_pnl = (futures_entry - futures_exit) * hedged_bbl
     hedged_revenue = physical_revenue + futures_pnl
+    benchmark_locked_revenue = futures_entry * production
 
     return {
         "spot_shock_pct": spot_shock_pct,
@@ -141,4 +156,6 @@ def stress_test(
         "physical_revenue": physical_revenue,
         "futures_pnl": futures_pnl,
         "hedged_revenue": hedged_revenue,
+        "benchmark_locked_revenue": benchmark_locked_revenue,
+        "revenue_surprise": hedged_revenue - benchmark_locked_revenue,
     }
