@@ -1,59 +1,93 @@
 # WTI Producer Hedge Simulator
 
-A portfolio project that models how a crude-oil producer can use NYMEX WTI futures to reduce revenue volatility.
+A Python portfolio project modeling how a crude-oil producer can use NYMEX WTI futures to reduce revenue risk.
 
 ## Business question
 
-> If a producer expects to sell 100,000 barrels of crude each month, how much revenue risk can be reduced by hedging 25%, 50%, 75%, or 100% of production with WTI futures?
+> If a producer expects to sell **100,000 barrels of crude per month**, how much price risk can be reduced by hedging 25%, 50%, 75%, or 100% of expected production with WTI futures?
 
-This project reframes futures from a directional trading instrument into a commercial risk-management tool.
+The project reframes futures from a directional trading instrument into a **commercial risk-management tool**.
 
-## What the project does
+## Historical result
 
-- Downloads public WTI spot-price data from FRED and a front-month WTI futures proxy (`CL=F`) from Yahoo Finance.
-- Converts daily prices into monthly production and hedge observations.
-- Simulates a short futures hedge for monthly crude production.
-- Compares 0%, 25%, 50%, 75%, and 100% hedge ratios.
-- Calculates physical revenue, futures P&L, combined hedged revenue, revenue volatility, downside revenue, minimum monthly revenue, and hedge effectiveness.
-- Produces charts comparing unhedged and hedged revenue.
-- Includes a simple stress-test function for crude-price shocks.
+Using a historical sample from **February 2015 through July 2026**, the model finds that increasing the hedge ratio materially reduces the variance of monthly revenue surprise versus the prior-month WTI futures benchmark.
+
+| Hedge ratio | CL contracts short | Revenue-surprise std. dev. | 5th percentile surprise | Hedge effectiveness |
+|---:|---:|---:|---:|---:|
+| 0% | 0 | $711,294 | $-1,064,650 | 0.0% |
+| 25% | 25 | $540,295 | $-793,675 | 42.3% |
+| 50% | 50 | $373,697 | $-507,900 | 72.4% |
+| 75% | 75 | $221,653 | $-237,000 | 90.3% |
+| 100% | 100 | $142,693 | $-27,300 | 96.0% |
+
+A **75% hedge** reduced revenue-surprise variance by **90.3%** and lowered monthly surprise volatility from about **$711,294** unhedged to **$221,653**. A **100% benchmark hedge** reduced variance by **96.0%**, although residual spot/futures basis and continuous-contract effects remain.
+
+![Hedge effectiveness](outputs/hedge_effectiveness.svg)
+
+![Revenue surprise](outputs/revenue_surprise_history.svg)
 
 ## Commercial intuition
 
-A crude producer is naturally **long physical oil**: higher crude prices increase revenue, while lower prices reduce revenue.
+A crude producer is naturally **long physical oil**. Falling crude prices reduce the value of future production.
 
-To hedge that exposure, the producer can **short WTI futures**.
+To reduce that exposure, the producer can **short WTI futures**:
 
-If WTI falls, physical revenue decreases while the short futures position gains value. If WTI rises, physical revenue increases while the short futures position loses value.
+- if WTI falls, physical revenue falls but the short futures position gains;
+- if WTI rises, physical revenue rises but the short futures position loses.
 
-The objective is not to maximize trading profit. It is to stabilize commercial cash flow.
+The objective is not to maximize trading P&L. The objective is to make commercial cash flow more predictable.
 
-## Core hedge math
+## Model
 
 For monthly production volume `Q` and hedge ratio `h`:
 
 ```text
 Hedged barrels = Q × h
 
-Number of futures contracts =
-Hedged barrels / 1,000
+CL contracts = hedged barrels / 1,000
 ```
 
-One NYMEX WTI futures contract represents 1,000 barrels.
-
-For a short futures hedge:
+For the short futures position:
 
 ```text
 Futures P&L =
-(Entry futures price - Exit futures price) × Hedged barrels
+(entry futures price - exit futures price) × hedged barrels
 ```
 
-Total commercial revenue:
+Commercial revenue:
 
 ```text
 Hedged revenue =
-Physical revenue + Futures P&L
+physical revenue + futures P&L
 ```
+
+The key risk measure is **revenue surprise**:
+
+```text
+Benchmark locked revenue =
+futures entry price × total monthly production
+
+Revenue surprise =
+hedged revenue - benchmark locked revenue
+```
+
+Hedge effectiveness is:
+
+```text
+1 - Var(hedged revenue surprise) / Var(unhedged revenue surprise)
+```
+
+## What the project demonstrates
+
+- physical commodity exposure translated into futures hedge sizing;
+- WTI contract sizing at 1,000 barrels per CL contract;
+- physical revenue + derivatives P&L;
+- partial versus full hedging;
+- downside-risk analysis;
+- hedge effectiveness;
+- basis/proxy risk;
+- stress testing;
+- Python time-series analysis and visualization.
 
 ## Project structure
 
@@ -61,15 +95,19 @@ Physical revenue + Futures P&L
 wti-producer-hedge-simulator/
 ├── README.md
 ├── requirements.txt
-├── LICENSE
-├── .gitignore
 ├── run_analysis.py
-├── data/
-│   └── README.md
+├── src/
+│   └── hedge_engine.py
 ├── notebooks/
 │   └── WTI_Producer_Hedge_Simulator.ipynb
-└── src/
-    └── hedge_engine.py
+├── data/
+│   └── README.md
+└── outputs/
+    ├── README.md
+    ├── hedge_ratio_summary.csv
+    ├── monthly_analysis.csv
+    ├── hedge_effectiveness.svg
+    └── revenue_surprise_history.svg
 ```
 
 ## Quick start
@@ -80,32 +118,35 @@ pip install -r requirements.txt
 python run_analysis.py
 ```
 
-The script saves analysis tables, summary metrics, and charts into the `outputs/` folder.
+## Data
 
-## Important modeling note
+The runtime script refreshes WTI Cushing spot from **FRED/EIA** and the continuous front-month WTI proxy from **Yahoo Finance (`CL=F`)**.
 
-This is a portfolio/educational model. Yahoo Finance's `CL=F` is used as a **continuous front-month WTI futures proxy**, not as a contract-specific historical settlement database.
+The committed historical snapshot uses public mirrors of those series for reproducibility:
 
-A production trading/risk system would normally use individual futures contracts, explicit expiration and roll rules, contract-specific settlement prices, physical location and quality differentials, transaction costs, margin requirements, and credit/liquidity constraints.
+- [WTI spot dataset](https://github.com/datasets/oil-prices)
+- [WTI futures history](https://github.com/JavierLuqueGarcia/Crude-oil-Backtest)
 
-That limitation is intentional and documented rather than hidden.
+## Important limitation
 
-## Possible extensions
+This is an educational/portfolio risk model, not a production ETRM system. A continuous front-month futures series can contain roll effects and does not represent a single contract held from hedge initiation to physical settlement.
+
+An institutional implementation would use contract-specific settlements, explicit roll rules, physical location/quality differentials, transaction costs, margin/liquidity constraints, and counterparty/credit considerations.
+
+## Next extensions
 
 - Midland/Cushing basis risk
-- WTI vs Brent cross-hedging
-- minimum-variance hedge ratios
-- rolling regression hedge ratios
-- options/collars
-- producer breakeven floors
+- minimum-variance hedge ratio
+- rolling hedge ratios
+- WTI/Brent cross-hedging
+- producer collars and put options
 - VaR and stress testing
-- Streamlit dashboard
-- storage / contango economics
+- Streamlit risk dashboard
 
 ## Why I built this
 
-My interest is in the intersection of physical energy markets, futures, risk, and commercial decision-making. This project translates concepts familiar from active futures trading into the risk-management problem faced by a crude producer.
+My interest is in the intersection of physical energy markets, futures, risk, and commercial decision-making. This project applies futures concepts to the cash-flow problem faced by a crude producer rather than to directional speculation.
 
 ---
 
-**Disclaimer:** Educational/portfolio use only. Not investment advice.
+**Disclaimer:** Educational and portfolio use only. Not investment advice.
