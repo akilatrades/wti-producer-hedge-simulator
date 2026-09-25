@@ -70,3 +70,31 @@ basis_hedged = simulate_basis_scenario(
 assert basis_hedged["residual_revenue_risk"] == 0
 
 print("Basis-risk math checks passed.")
+
+
+from src.min_variance import (
+    contracts_for_hedge_ratio,
+    hedge_ratio_diagnostics,
+    minimum_variance_hedge_ratio,
+)
+
+# Synthetic data where spot and futures changes move one-for-one.
+mv_market = pd.DataFrame(
+    {
+        "spot_exit": [70.0, 72.0, 69.0, 74.0],
+        "futures_entry": [69.0, 70.0, 72.0, 69.0],
+        "futures_exit": [70.0, 72.0, 69.0, 74.0],
+    },
+    index=pd.to_datetime(
+        ["2026-01-31", "2026-02-28", "2026-03-31", "2026-04-30"]
+    ),
+)
+
+mv_ratio = minimum_variance_hedge_ratio(mv_market)
+assert round(mv_ratio, 6) == 1.0
+assert contracts_for_hedge_ratio(100_000, mv_ratio) == 100
+
+mv_diag = hedge_ratio_diagnostics(mv_market, mv_ratio)
+assert round(mv_diag["variance_reduction"], 6) == 1.0
+
+print("Minimum-variance hedge math checks passed.")
