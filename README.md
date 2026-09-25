@@ -220,6 +220,33 @@ The committed historical snapshot uses public mirrors for reproducibility:
 - [WTI spot dataset](https://github.com/datasets/oil-prices)
 - [WTI futures history](https://github.com/JavierLuqueGarcia/Crude-oil-Backtest)
 
+## Glossary
+
+Here are the main terms used in the project:
+
+| Term | Simple meaning |
+|---|---|
+| **WTI** | West Texas Intermediate, a major U.S. crude-oil price benchmark. |
+| **CL** | The ticker used for NYMEX WTI crude-oil futures. One CL contract represents 1,000 barrels. |
+| **Physical crude** | The actual oil a producer sells. |
+| **Futures contract** | A contract tied to the future price of oil. |
+| **Hedge** | A position used to reduce price risk. |
+| **Short futures** | Selling futures so the position can gain value if oil prices fall. |
+| **Hedge ratio** | The percentage of expected production that is hedged. |
+| **P&L** | Profit and loss from a position. |
+| **Basis** | The price difference between two related crude-oil prices or locations. |
+| **Basis risk** | The risk that those two prices do not move together. |
+| **Basis swap** | A contract used to hedge a price difference between two locations or benchmarks. |
+| **Cushing** | Oklahoma delivery point used for NYMEX WTI futures pricing. |
+| **Midland** | A major crude-oil pricing location in the Permian Basin. |
+| **Revenue surprise** | The difference between expected revenue and what the model actually produced. |
+| **Hedge effectiveness** | How much the hedge reduced revenue risk. |
+| **Minimum-variance hedge ratio** | The hedge size that historically reduced price movement the most in the model. |
+| **Volatility** | How much prices or revenue move up and down. |
+| **Stress test** | A test showing what happens under a large or unfavorable market move. |
+| **Continuous futures series** | A price history that links several futures contracts together over time. |
+| **ETRM** | Energy Trading and Risk Management system used to track trades, positions, risk, and settlements. |
+
 ## Limitations
 
 This is a portfolio project, not a production trading or ETRM system.
