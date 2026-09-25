@@ -26,6 +26,39 @@ A **75% hedge** reduced revenue-surprise variance by **90.3%** and lowered month
 
 ![Revenue surprise](outputs/revenue_surprise_history.svg)
 
+## Basis risk extension: Midland vs Cushing
+
+A producer may sell physical crude in **Midland, Texas** while using NYMEX WTI futures referenced to **Cushing, Oklahoma**. That introduces **location basis risk**:
+
+```text
+Midland basis = Midland physical price - Cushing price
+```
+
+A flat-price WTI futures hedge can neutralize much of the outright crude-price move while leaving the producer exposed to the Midland/Cushing differential.
+
+The project now includes an **illustrative basis stress test** with a basis initially locked at **-$1/bbl**. The producer is assumed to hedge 100% of flat-price exposure with WTI futures while separately testing 0%, 50%, and 100% basis-swap coverage.
+
+Example: if realized Midland basis widens from **-$1/bbl to -$5/bbl**, a 100,000 bbl/month producer has a **$400,000 location-basis shortfall** even though the outright WTI price is fully hedged. A 50% basis hedge cuts that residual to **$200,000**; a 100% basis swap offsets the modeled basis move.
+
+![Midland-Cushing basis risk stress test](outputs/basis_risk_stress.svg)
+
+This is intentionally a **scenario analysis, not a claimed historical Midland cash backtest**. Reliable institutional basis datasets are often proprietary. The commercial mechanism is real: public EOG disclosures describe using Midland Differential basis swaps to fix the difference between Midland and Cushing pricing.
+
+- [EIA: WTI Cushing spot-market definition](https://www.eia.gov/dnav/pet/TblDefs/pet_pri_spt_tbldef2.asp)
+- [SEC/EOG disclosure: Midland Differential basis swaps](https://www.sec.gov/Archives/edgar/data/821189/000082118919000020/a2019033110-q.htm)
+
+### Why this matters
+
+This separates two risks that are easy to blur together:
+
+```text
+Outright price risk → hedge with WTI futures
+
+Location basis risk → hedge with a Midland/Cushing basis instrument
+```
+
+A producer can therefore be **100% hedged on flat price and still lose money versus its expected realized price if local basis weakens**.
+
 ## Commercial intuition
 
 A crude producer is naturally **long physical oil**. Falling crude prices reduce the value of future production.
@@ -85,6 +118,8 @@ Hedge effectiveness is:
 - partial versus full hedging;
 - downside-risk analysis;
 - hedge effectiveness;
+- explicit Midland/Cushing location basis risk;
+- basis-swap scenario hedging;
 - basis/proxy risk;
 - stress testing;
 - Python time-series analysis and visualization.
@@ -97,7 +132,8 @@ wti-producer-hedge-simulator/
 ├── requirements.txt
 ├── run_analysis.py
 ├── src/
-│   └── hedge_engine.py
+│   ├── hedge_engine.py
+│   └── basis_risk.py
 ├── notebooks/
 │   └── WTI_Producer_Hedge_Simulator.ipynb
 ├── data/
@@ -107,7 +143,9 @@ wti-producer-hedge-simulator/
     ├── hedge_ratio_summary.csv
     ├── monthly_analysis.csv
     ├── hedge_effectiveness.svg
-    └── revenue_surprise_history.svg
+    ├── revenue_surprise_history.svg
+    ├── basis_risk_scenarios.csv
+    └── basis_risk_stress.svg
 ```
 
 ## Quick start
@@ -135,7 +173,7 @@ An institutional implementation would use contract-specific settlements, explici
 
 ## Next extensions
 
-- Midland/Cushing basis risk
+- historical contract-specific Midland basis data
 - minimum-variance hedge ratio
 - rolling hedge ratios
 - WTI/Brent cross-hedging
