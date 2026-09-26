@@ -12,6 +12,8 @@ This project looks at three questions:
 
 No background in futures or physical energy trading is required. The terms are explained as they come up.
 
+This is an ongoing project. The model and documentation will continue to be updated as new ideas, tests, and improvements are added.
+
 ## 30-second summary
 
 A producer that expects to sell oil in the future is exposed to falling prices. Short WTI futures can offset part of that risk.
