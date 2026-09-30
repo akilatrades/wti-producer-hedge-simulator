@@ -2,7 +2,7 @@
 
 This file contains the calculation logic.
 
-The beginner idea is simple:
+The workflow is:
 
 1. Load four WTI futures delivery positions: C1, C2, C3, and C4.
 2. Put the four prices on the same row for each month.
@@ -204,7 +204,7 @@ def add_curve_metrics(
         C1-C3 = Contract 1 price - Contract 3 price
         C1-C4 = Contract 1 price - Contract 4 price
 
-    The C1-C4 spread is the main teaching measure.
+    The C1-C4 spread is the main measure used in this module.
 
         positive C1-C4 -> C1 is above C4
         negative C1-C4 -> C1 is below C4
