@@ -11,8 +11,6 @@ This project looks at four questions:
 3. Can historical spot and futures data help estimate a better hedge size?
 4. What does the WTI futures curve tell us about prices across delivery months?
 
-No background in futures or physical energy trading is required. The terms are explained as they come up.
-
 This is an ongoing project. The model and documentation will continue to be updated as new ideas, tests, and improvements are added.
 
 ## 30-second summary
@@ -33,7 +31,7 @@ In this sample, a 75% hedge reduces the variance of monthly revenue surprise by 
 
 ![Hedge effectiveness](outputs/hedge_effectiveness.svg)
 
-The model also tests Midland/Cushing basis risk, estimates a minimum-variance hedge ratio from historical spot and futures price changes, and now includes a beginner-friendly WTI term-structure module using the first four futures delivery contracts.
+The model also tests Midland/Cushing basis risk, estimates a minimum-variance hedge ratio from historical spot and futures price changes, and now includes a WTI term-structure module using the first four futures delivery contracts.
 
 ## What is a futures contract?
 
@@ -195,7 +193,7 @@ C1-C4 = +$3/bbl
 
 C1 is above C4, so the near part of the curve is priced higher than the later part.
 
-The project uses a simple teaching rule:
+The project uses the following classification rule:
 
 ```text
 C1-C4 > +$0.25/bbl  -> backwardation
@@ -225,15 +223,15 @@ Why does this matter to a producer?
 
 A producer has oil arriving in different future months. A more realistic hedge program therefore needs to think about **which futures delivery month matches which physical production month**, rather than treating WTI as one single price.
 
-For the complete step-by-step beginner lesson, including the math, common mistakes, output files, and interview explanation, read:
+For the full step-by-step walkthrough, including the math, interpretation notes, output files, and interview explanation, read:
 
-**[Module 2 - Beginner WTI Futures Curve Walkthrough](outputs/TERM_STRUCTURE_README.md)**
+**[Module 2 - WTI Futures Curve Walkthrough](outputs/TERM_STRUCTURE_README.md)**
 
-There is also a separate beginner notebook:
+There is also a separate walkthrough notebook:
 
-**[WTI Term Structure Beginner Walkthrough](notebooks/WTI_Term_Structure_Beginner_Walkthrough.ipynb)**
+**[WTI Term Structure Walkthrough](notebooks/WTI_Term_Structure_Walkthrough.ipynb)**
 
-Run the teaching script with:
+Run the analysis script with:
 
 ```bash
 python run_term_structure.py
