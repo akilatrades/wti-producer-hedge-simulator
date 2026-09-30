@@ -36,7 +36,7 @@ See `min_variance_summary.csv`, `min_variance_comparison.csv`, `min_variance_com
 
 ## WTI futures curve / term structure
 
-Module 2 compares the first four historical WTI futures delivery positions.
+The project compares the first four historical WTI futures delivery positions.
 
 The main calculation is:
 
@@ -71,9 +71,4 @@ Main files:
 - `term_structure_c1_c4_spread.svg` — the C1-C4 spread through time.
 - `term_structure_curve_examples.svg` — visual examples of the two main curve shapes.
 
-For the full walkthrough, read `TERM_STRUCTURE_README.md`.
-
-For a notebook that walks through the calculation one cell at a time, open:
-
-`../notebooks/WTI_Term_Structure_Walkthrough.ipynb`
 
