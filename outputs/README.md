@@ -38,7 +38,7 @@ See `min_variance_summary.csv`, `min_variance_comparison.csv`, `min_variance_com
 
 Module 2 compares the first four historical WTI futures delivery positions.
 
-The main beginner calculation is:
+The main calculation is:
 
 ```text
 C1-C4 spread = Contract 1 price - Contract 4 price
@@ -51,7 +51,7 @@ positive C1-C4 -> C1 is above C4
 negative C1-C4 -> C1 is below C4
 ```
 
-The project then applies a simple teaching threshold:
+The project then applies a simple classification threshold:
 
 ```text
 above +$0.25/bbl -> backwardation
@@ -71,9 +71,9 @@ Main files:
 - `term_structure_c1_c4_spread.svg` — the C1-C4 spread through time.
 - `term_structure_curve_examples.svg` — visual examples of the two main curve shapes.
 
-For the full beginner lesson, read `TERM_STRUCTURE_README.md`.
+For the full walkthrough, read `TERM_STRUCTURE_README.md`.
 
 For a notebook that walks through the calculation one cell at a time, open:
 
-`../notebooks/WTI_Term_Structure_Beginner_Walkthrough.ipynb`
+`../notebooks/WTI_Term_Structure_Walkthrough.ipynb`
 
