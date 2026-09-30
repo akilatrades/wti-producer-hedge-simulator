@@ -1,0 +1,4 @@
+curve_regime,months,average_c1_c4_spread,average_front_month_price,share_of_sample
+backwardation,48,2.045,75.292,0.428571
+flat,10,-0.017,65.963,0.089286
+contango,54,-1.836,47.609,0.482143
