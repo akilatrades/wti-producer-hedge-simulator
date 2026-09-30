@@ -33,3 +33,21 @@ The static estimate is 1.016, or about 102 CL contracts after rounding for 100,0
 The rolling output shows how that estimate changes through time.
 
 See `min_variance_summary.csv`, `min_variance_comparison.csv`, `min_variance_comparison.svg`, `rolling_min_variance_ratio.csv`, and `rolling_min_variance_ratio.svg`.
+
+## WTI term structure
+
+Module 2 studies the first four WTI futures delivery contracts and calculates C1-C2, C1-C3, and C1-C4 calendar spreads.
+
+The C1-C4 spread is used to label each month as backwardation, contango, or relatively flat under a simple +/- $0.25/bbl threshold.
+
+The saved historical snapshot covers January 2015 through April 2024. Under that rule, the sample contains 48 backwardation months, 54 contango months, and 10 flat months.
+
+The main files are `term_structure_monthly.csv`, `term_structure_regime_summary.csv`, and `term_structure_example_curves.csv`.
+
+Running `python run_term_structure.py` also creates:
+
+- `term_structure_c1_c4_spread.svg`
+- `term_structure_curve_examples.svg`
+
+For a step-by-step beginner explanation, see `TERM_STRUCTURE_README.md`.
+
