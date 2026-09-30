@@ -31,7 +31,7 @@ In this sample, a 75% hedge reduces the variance of monthly revenue surprise by 
 
 ![Hedge effectiveness](outputs/hedge_effectiveness.svg)
 
-The model also tests Midland/Cushing basis risk, estimates a minimum-variance hedge ratio from historical spot and futures price changes, and now includes a WTI term-structure module using the first four futures delivery contracts.
+The model also tests Midland/Cushing basis risk, estimates a minimum-variance hedge ratio from historical spot and futures price changes, and includes WTI futures-curve analysis using the first four historical delivery positions.
 
 ## What is a futures contract?
 
@@ -157,41 +157,88 @@ That result changes over time, which shows that the relationship between spot an
 The 102-contract result is a statistical estimate, not a recommendation to hedge more than expected production. A real company would also consider production uncertainty, hedge limits, liquidity, accounting treatment, and internal risk policy.
 
 
-## Module 2: WTI futures curve / term structure
+## WTI futures curve / term structure
 
-Module 2 adds one new idea:
+WTI is not one single futures price. Multiple WTI futures contracts trade at the same time, and each contract is tied to a different delivery period.
 
-> WTI futures do not have one single price. Different delivery periods can trade at different prices.
+When those contract prices are arranged from nearer delivery to later delivery, they form the **futures curve**, also called the **term structure**.
 
-The project uses four historical WTI futures delivery positions from EIA:
+The historical EIA data used here contains four delivery positions:
 
 ```text
 C1 = nearest delivery position in the historical series
 C2 = next delivery position
-C3 = next one after that
+C3 = next delivery position after C2
 C4 = fourth delivery position
 ```
 
-C1 is **not one permanent contract**. It means "the nearest contract position" at each point in the historical data, so the exact contract represented by C1 changes through time.
+C1 is not one permanent contract. It means the nearest delivery position at each point in the historical series, so the exact contract represented by C1 changes through time.
 
-The module then compares the near contract with later contracts.
+### Step 1: compare the delivery positions
 
-The main calculation is:
+Assume one observation has these prices:
 
 ```text
+C1 = $80
+C2 = $79
+C3 = $78
+C4 = $77
+```
+
+The nearer contracts are priced above the later contracts.
+
+Now compare that with:
+
+```text
+C1 = $70
+C2 = $71
+C3 = $72
+C4 = $73
+```
+
+Here, the later contracts are priced above the nearer contracts.
+
+The curve analysis turns those relationships into numbers that can be tracked through time.
+
+### Step 2: calculate calendar spreads
+
+A **calendar spread** is the price difference between two delivery positions.
+
+The project calculates:
+
+```text
+C1-C2 spread = C1 price - C2 price
+C1-C3 spread = C1 price - C3 price
 C1-C4 spread = C1 price - C4 price
 ```
 
-A simple example:
+The main measure used here is C1-C4.
+
+Example:
 
 ```text
 C1 = $80
 C4 = $77
 
-C1-C4 = +$3/bbl
+C1-C4 = $80 - $77
+      = +$3/bbl
 ```
 
-C1 is above C4, so the near part of the curve is priced higher than the later part.
+A positive result means C1 is priced above C4.
+
+Another example:
+
+```text
+C1 = $70
+C4 = $73
+
+C1-C4 = $70 - $73
+      = -$3/bbl
+```
+
+A negative result means C1 is priced below C4.
+
+### Step 3: describe the curve shape
 
 The project uses the following classification rule:
 
@@ -201,41 +248,84 @@ C1-C4 < -$0.25/bbl  -> contango
 between those values -> relatively flat
 ```
 
-In plain English:
+The $0.25/bbl cutoff is a project setting used to keep very small differences from being treated as meaningful curve changes. It is not a universal market rule.
 
-- **Backwardation:** nearby futures are above later futures.
-- **Contango:** later futures are above nearby futures.
-- **Flat:** the price difference is small.
+**Backwardation** means nearby futures are priced above later futures.
 
-The $0.25 threshold is only a setting used by this project. It is not a universal market rule.
+```text
+C1 = $80
+C2 = $79
+C3 = $78
+C4 = $77
+```
 
-The saved EIA snapshot covers January 2015 through April 2024. Under the project's simple threshold, the sample contains 48 backwardation months, 54 contango months, and 10 flat months.
+**Contango** means later futures are priced above nearby futures.
+
+```text
+C1 = $70
+C2 = $71
+C3 = $72
+C4 = $73
+```
+
+A **flat curve** means the near and later prices are close under the project's chosen threshold.
+
+These labels describe the relationship between delivery months. They are not, by themselves, forecasts that WTI must rise or fall next.
+
+### Step 4: measure the curve through time
+
+For every monthly observation, the project saves:
+
+| Field | Meaning |
+|---|---|
+| `contract_1` to `contract_4` | WTI prices for the four delivery positions |
+| `c1_c2_spread` | C1 minus C2 |
+| `c1_c3_spread` | C1 minus C3 |
+| `c1_c4_spread` | C1 minus C4 |
+| `curve_slope_per_contract` | average price change per contract step from C1 to C4 |
+| `curve_regime` | backwardation, contango, or flat |
+
+The saved EIA curve sample covers January 2015 through April 2024. Under the project's classification rule, it contains 48 backwardation months, 54 contango months, and 10 flat months.
 
 ![WTI C1-C4 spread history](outputs/term_structure_c1_c4_spread.svg)
 
-The project also plots one strong backwardation example and one strong contango example so the curve shapes can be seen directly.
+The chart above is read as follows:
+
+```text
+above zero -> C1 is above C4 -> backwardation
+below zero -> C1 is below C4 -> contango
+near zero  -> C1 and C4 are close
+```
+
+The project also plots one strong backwardation observation and one strong contango observation so the actual curve shapes can be compared.
 
 ![WTI curve-shape examples](outputs/term_structure_curve_examples.svg)
 
-This module is **descriptive**, not a trading signal. Backwardation does not automatically mean WTI will rise, and contango does not automatically mean WTI will fall.
+### Why the curve matters to the producer hedge
 
-Why does this matter to a producer?
+The original hedge calculation asks how much expected production should be hedged.
 
-A producer has oil arriving in different future months. A more realistic hedge program therefore needs to think about **which futures delivery month matches which physical production month**, rather than treating WTI as one single price.
+The curve adds the time dimension.
 
-For the full step-by-step walkthrough, including the math, interpretation notes, output files, and interview explanation, read:
+A producer may have expected production in several future months:
 
-**[Module 2 - WTI Futures Curve Walkthrough](outputs/TERM_STRUCTURE_README.md)**
-
-There is also a separate walkthrough notebook:
-
-**[WTI Term Structure Walkthrough](notebooks/WTI_Term_Structure_Walkthrough.ipynb)**
-
-Run the analysis script with:
-
-```bash
-python run_term_structure.py
+```text
+January production
+February production
+March production
+April production
 ```
+
+Those barrels do not all arrive at the same time. A more realistic hedge process therefore needs to consider which futures delivery period lines up with each physical production period.
+
+That creates additional questions:
+
+- Which futures contract best matches the month when the physical crude will be sold?
+- How different are nearby and later futures prices?
+- What happens when the curve changes shape?
+- What happens when a hedge is moved, or rolled, from one delivery contract into another?
+
+The current project does not yet model a full contract-by-contract hedge schedule. The curve analysis establishes the price structure needed to study that next.
 
 ## What are Cushing and Midland?
 
@@ -382,7 +472,7 @@ Module 2 uses EIA historical Contract 1-4 WTI futures data. EIA notes that this 
 | Flat curve | Nearby and later prices are very close under the project's chosen threshold. |
 | Curve slope | A simple measure of how much the curve rises or falls across delivery positions. |
 | Curve regime | The project's simple label: backwardation, contango, or flat. |
-| Threshold | A cutoff used by the project to assign a label. Module 2 uses +/- $0.25/bbl. |
+| Threshold | A cutoff used by the project to assign a curve label. The current analysis uses +/- $0.25/bbl. |
 | Prompt barrels | Physical oil needed or delivered in the near term. |
 | Carry | The economics of holding a commodity through time, including storage and financing. |
 | Roll | Moving a futures position from an expiring contract into a later contract. |
@@ -397,9 +487,8 @@ Module 2 uses EIA historical Contract 1-4 WTI futures data. EIA notes that this 
 python -m venv .venv
 pip install -r requirements.txt
 python run_analysis.py
-python run_term_structure.py
 ```
 
-Project files are organized into `src/` for the model logic, `notebooks/` for the walkthrough, and `outputs/` for the saved results and charts.
+Project files are organized into `src/` for the model logic, one main notebook for the worked analysis, `data/` for saved inputs, and `outputs/` for saved results and charts.
 
 Educational and portfolio use only. Not investment advice.
