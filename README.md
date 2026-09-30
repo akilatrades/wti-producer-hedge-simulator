@@ -198,6 +198,12 @@ In plain English:
 
 The saved EIA snapshot covers January 2015 through April 2024. In that sample, 48 months are classified as backwardation, 54 as contango, and 10 as flat under the simple +/- $0.25/bbl rule.
 
+![WTI C1-C4 spread history](outputs/term_structure_c1_c4_spread.svg)
+
+The code also selects the strongest backwardation and contango examples in the sample so the two curve shapes can be seen directly.
+
+![WTI curve-shape examples](outputs/term_structure_curve_examples.svg)
+
 This is descriptive market-structure analysis, not a claim that backwardation is automatically bullish or contango is automatically bearish.
 
 The purpose is to make the hedge project more realistic. A producer has future production arriving in different months, so a professional hedge program eventually needs to think about **which futures delivery month best matches which physical production month**.
