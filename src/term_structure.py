@@ -1,4 +1,4 @@
-"""WTI futures-curve utilities used by Module 2.
+"""WTI futures-curve utilities used by the producer hedge project.
 
 This file contains the calculation logic.
 
