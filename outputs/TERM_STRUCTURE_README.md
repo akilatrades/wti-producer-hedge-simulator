@@ -1,11 +1,5 @@
 # Module 2 — WTI Futures Curve / Term Structure
 
-This guide is written for someone who is **brand new to commodity futures**.
-
-You do not need to know what a futures curve, calendar spread, backwardation, contango, or roll means before starting. Each term is explained before it is used.
-
----
-
 ## What are we trying to learn?
 
 The original project asks:
@@ -24,7 +18,7 @@ The line-up of futures prices across delivery months is called the **futures cur
 
 ---
 
-# Start with one simple idea
+# Start with the core idea
 
 Imagine four WTI futures prices are shown at the same time:
 
@@ -66,7 +60,7 @@ C1 -> C2 -> C3 -> C4
 
 Here, prices rise as delivery moves farther into the future.
 
-Those two shapes have different names. We will get to those names only after the math is clear.
+Those two shapes are the foundation for distinguishing backwardation from contango.
 
 ---
 
@@ -81,10 +75,6 @@ This module does seven basic things:
 5. **Summarize** how often each curve shape appeared.
 6. **Chart** the spread through time and show example curves.
 7. **Connect** the curve back to a physical producer and hedging decisions.
-
-Nothing more complicated than that is required to understand the module.
-
----
 
 # Step 1 — Load the four futures prices
 
@@ -123,7 +113,7 @@ That is important. C1 is a position on the curve — "nearest contract" — rath
 
 Four contracts are enough to show whether the front of the WTI curve is generally above, below, or close to the later part of the curve.
 
-It is a simple starting point.
+It provides a compact view of the front portion of the curve.
 
 A professional trading desk may look at many more delivery months.
 
@@ -594,7 +584,7 @@ Later modules can test whether curve shape is related to hedge performance, retu
 
 ---
 
-# Common beginner mistakes
+# Common interpretation mistakes
 
 ## Mistake 1 — Thinking C1 is one permanent contract
 
@@ -657,7 +647,7 @@ Run:
 python run_term_structure.py
 ```
 
-The script walks through the work in plain English.
+The script prints each stage of the analysis as it runs.
 
 It:
 
@@ -740,7 +730,7 @@ That would directly connect this module back to hedge performance.
 
 ---
 
-# Beginner glossary
+# Glossary
 
 | Term | Plain-English meaning |
 |---|---|
