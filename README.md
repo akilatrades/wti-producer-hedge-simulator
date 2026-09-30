@@ -9,6 +9,7 @@ This project looks at three questions:
 1. How much can a futures hedge reduce that price risk?
 2. What happens when Midland and Cushing prices move differently?
 3. Can historical spot and futures data help estimate a better hedge size?
+4. What does the WTI futures curve tell us about prices across delivery months?
 
 No background in futures or physical energy trading is required. The terms are explained as they come up.
 
@@ -32,7 +33,7 @@ In this sample, a 75% hedge reduces the variance of monthly revenue surprise by 
 
 ![Hedge effectiveness](outputs/hedge_effectiveness.svg)
 
-The model also tests Midland/Cushing basis risk and estimates a minimum-variance hedge ratio from historical spot and futures price changes.
+The model also tests Midland/Cushing basis risk, estimates a minimum-variance hedge ratio from historical spot and futures price changes, and now includes a beginner-friendly WTI term-structure module using the first four futures delivery contracts.
 
 ## What is a futures contract?
 
@@ -157,6 +158,60 @@ That result changes over time, which shows that the relationship between spot an
 
 The 102-contract result is a statistical estimate, not a recommendation to hedge more than expected production. A real company would also consider production uncertainty, hedge limits, liquidity, accounting treatment, and internal risk policy.
 
+
+## Module 2: WTI futures term structure
+
+The next extension moves beyond looking at only one futures price.
+
+A commodity futures market has many contracts at the same time, each tied to a different delivery month. When those prices are lined up by delivery month, they form the **futures curve**, also called the **term structure**.
+
+For the historical EIA dataset used here:
+
+```text
+C1 = nearest delivery contract
+C2 = next delivery contract
+C3 = next delivery contract
+C4 = fourth delivery contract
+```
+
+The module calculates simple **calendar spreads**:
+
+```text
+C1-C2 = Contract 1 price - Contract 2 price
+C1-C3 = Contract 1 price - Contract 3 price
+C1-C4 = Contract 1 price - Contract 4 price
+```
+
+The C1-C4 spread is then used as a simple curve-shape measure.
+
+```text
+C1-C4 above +$0.25/bbl  -> backwardation
+C1-C4 below -$0.25/bbl  -> contango
+between those values    -> relatively flat
+```
+
+In plain English:
+
+- **Backwardation** means nearby futures are priced above later futures.
+- **Contango** means later futures are priced above nearby futures.
+- **Flat** means the price difference is small.
+
+The saved EIA snapshot covers January 2015 through April 2024. In that sample, 48 months are classified as backwardation, 54 as contango, and 10 as flat under the simple +/- $0.25/bbl rule.
+
+This is descriptive market-structure analysis, not a claim that backwardation is automatically bullish or contango is automatically bearish.
+
+The purpose is to make the hedge project more realistic. A producer has future production arriving in different months, so a professional hedge program eventually needs to think about **which futures delivery month best matches which physical production month**.
+
+For the complete beginner walkthrough, including every formula, example, output file, and an interview-ready explanation, see:
+
+**[Module 2 - WTI Futures Term Structure](outputs/TERM_STRUCTURE_README.md)**
+
+Run the module with:
+
+```bash
+python run_term_structure.py
+```
+
 ## What are Cushing and Midland?
 
 Cushing, Oklahoma is the delivery point for the NYMEX WTI futures contract and a major U.S. crude storage and pipeline hub.
@@ -259,6 +314,8 @@ A continuous futures series links several futures contracts together to create o
 
 A live hedge program would also need specific contract months, roll timing, transaction costs, margin, liquidity, production changes, quality and location differences, accounting treatment, credit risk, and internal hedge limits.
 
+Module 2 uses EIA historical Contract 1-4 WTI futures data. EIA notes that this NYMEX futures history is not available after April 5, 2024, so the term-structure section is a historical research example rather than a live curve feed.
+
 <details>
 <summary><strong>Glossary</strong></summary>
 
@@ -285,6 +342,18 @@ A live hedge program would also need specific contract months, roll timing, tran
 | Volatility | How much a price or revenue series moves around. |
 | Stress test | A test of what happens during a large or unfavorable market move. |
 | Continuous futures series | A price history created by linking multiple futures contracts over time. |
+| Futures curve | Several futures prices lined up by delivery month. |
+| Term structure | Another name for how futures prices are arranged across delivery dates. |
+| Front / near contract | The nearest delivery contract in the curve. |
+| Deferred contract | A futures contract with delivery farther in the future. |
+| Calendar spread | The price difference between two futures delivery months. |
+| Backwardation | A curve where nearby futures are priced above later futures. |
+| Contango | A curve where later futures are priced above nearby futures. |
+| Curve slope | A simple measure of how quickly prices rise or fall across delivery months. |
+| Prompt barrels | Physical oil needed or delivered in the near term. |
+| Carry | The economics of holding a commodity through time, including storage and financing. |
+| Roll | Moving a futures position from an expiring contract into a later contract. |
+| Roll risk | The risk or cost created because the new futures contract may trade at a different price. |
 | ETRM | Energy Trading and Risk Management software used to track trades, positions, risk, and settlements. |
 
 </details>
@@ -295,6 +364,7 @@ A live hedge program would also need specific contract months, roll timing, tran
 python -m venv .venv
 pip install -r requirements.txt
 python run_analysis.py
+python run_term_structure.py
 ```
 
 Project files are organized into `src/` for the model logic, `notebooks/` for the walkthrough, and `outputs/` for the saved results and charts.
