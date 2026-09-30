@@ -34,20 +34,46 @@ The rolling output shows how that estimate changes through time.
 
 See `min_variance_summary.csv`, `min_variance_comparison.csv`, `min_variance_comparison.svg`, `rolling_min_variance_ratio.csv`, and `rolling_min_variance_ratio.svg`.
 
-## WTI term structure
+## WTI futures curve / term structure
 
-Module 2 studies the first four WTI futures delivery contracts and calculates C1-C2, C1-C3, and C1-C4 calendar spreads.
+Module 2 compares the first four historical WTI futures delivery positions.
 
-The C1-C4 spread is used to label each month as backwardation, contango, or relatively flat under a simple +/- $0.25/bbl threshold.
+The main beginner calculation is:
 
-The saved historical snapshot covers January 2015 through April 2024. Under that rule, the sample contains 48 backwardation months, 54 contango months, and 10 flat months.
+```text
+C1-C4 spread = Contract 1 price - Contract 4 price
+```
 
-The main files are `term_structure_monthly.csv`, `term_structure_regime_summary.csv`, and `term_structure_example_curves.csv`.
+The sign tells us which side of the curve is higher:
 
-Running `python run_term_structure.py` also creates:
+```text
+positive C1-C4 -> C1 is above C4
+negative C1-C4 -> C1 is below C4
+```
 
-- `term_structure_c1_c4_spread.svg`
-- `term_structure_curve_examples.svg`
+The project then applies a simple teaching threshold:
 
-For a step-by-step beginner explanation, see `TERM_STRUCTURE_README.md`.
+```text
+above +$0.25/bbl -> backwardation
+below -$0.25/bbl -> contango
+otherwise        -> flat
+```
+
+The $0.25 threshold is a project setting, not a universal market rule.
+
+The saved historical snapshot covers January 2015 through April 2024. Under this rule, the sample contains 48 backwardation months, 54 contango months, and 10 flat months.
+
+Main files:
+
+- `term_structure_monthly.csv` — every monthly C1-C4 observation plus the calculated spreads and label.
+- `term_structure_regime_summary.csv` — counts and averages by curve label.
+- `term_structure_example_curves.csv` — one strong backwardation example and one strong contango example.
+- `term_structure_c1_c4_spread.svg` — the C1-C4 spread through time.
+- `term_structure_curve_examples.svg` — visual examples of the two main curve shapes.
+
+For the full beginner lesson, read `TERM_STRUCTURE_README.md`.
+
+For a notebook that walks through the calculation one cell at a time, open:
+
+`../notebooks/WTI_Term_Structure_Beginner_Walkthrough.ipynb`
 
