@@ -1,9 +1,6 @@
 """Run Module 2: WTI futures-curve analysis.
 
-This script is intentionally written as a teaching script.
-
-It prints what it is doing in plain English so a beginner can follow the
-calculation from raw C1-C4 prices to the final curve labels.
+This script prints each stage of the analysis as it runs, from raw C1-C4 prices to the final curve labels.
 
 Run from the project root with:
 
@@ -144,7 +141,7 @@ def explain_regime_rule() -> None:
     """Explain how the spread is translated into a curve label."""
     print("STEP 4 - Turn the C1-C4 spread into a simple curve label.")
     print()
-    print("This project uses the following teaching rule:")
+    print("This project uses the following classification rule:")
     print("    C1-C4 > +USD 0.25/bbl  -> backwardation")
     print("    C1-C4 < -USD 0.25/bbl  -> contango")
     print("    otherwise               -> flat")
