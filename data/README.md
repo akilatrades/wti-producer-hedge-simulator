@@ -19,7 +19,7 @@ A live hedge program would need contract-specific prices, expiration and roll da
 
 ## WTI futures-curve data
 
-Module 2 adds four historical WTI futures delivery positions from the U.S. Energy Information Administration (EIA).
+The project also uses four historical WTI futures delivery positions from the U.S. Energy Information Administration (EIA).
 
 The easiest way to read them is:
 
