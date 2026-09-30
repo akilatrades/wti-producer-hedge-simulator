@@ -4,7 +4,7 @@ A Python project that models how a crude oil producer can use WTI futures to red
 
 The example assumes the producer expects to sell 100,000 barrels of crude oil each month. Because that oil will be sold later, the final selling price is still unknown. If oil prices fall before the sale, revenue falls with them.
 
-This project looks at three questions:
+This project looks at four questions:
 
 1. How much can a futures hedge reduce that price risk?
 2. What happens when Midland and Cushing prices move differently?
@@ -159,60 +159,81 @@ That result changes over time, which shows that the relationship between spot an
 The 102-contract result is a statistical estimate, not a recommendation to hedge more than expected production. A real company would also consider production uncertainty, hedge limits, liquidity, accounting treatment, and internal risk policy.
 
 
-## Module 2: WTI futures term structure
+## Module 2: WTI futures curve / term structure
 
-The next extension moves beyond looking at only one futures price.
+Module 2 adds one new idea:
 
-A commodity futures market has many contracts at the same time, each tied to a different delivery month. When those prices are lined up by delivery month, they form the **futures curve**, also called the **term structure**.
+> WTI futures do not have one single price. Different delivery periods can trade at different prices.
 
-For the historical EIA dataset used here:
+The project uses four historical WTI futures delivery positions from EIA:
 
 ```text
-C1 = nearest delivery contract
-C2 = next delivery contract
-C3 = next delivery contract
-C4 = fourth delivery contract
+C1 = nearest delivery position in the historical series
+C2 = next delivery position
+C3 = next one after that
+C4 = fourth delivery position
 ```
 
-The module calculates simple **calendar spreads**:
+C1 is **not one permanent contract**. It means "the nearest contract position" at each point in the historical data, so the exact contract represented by C1 changes through time.
+
+The module then compares the near contract with later contracts.
+
+The main calculation is:
 
 ```text
-C1-C2 = Contract 1 price - Contract 2 price
-C1-C3 = Contract 1 price - Contract 3 price
-C1-C4 = Contract 1 price - Contract 4 price
+C1-C4 spread = C1 price - C4 price
 ```
 
-The C1-C4 spread is then used as a simple curve-shape measure.
+A simple example:
 
 ```text
-C1-C4 above +$0.25/bbl  -> backwardation
-C1-C4 below -$0.25/bbl  -> contango
-between those values    -> relatively flat
+C1 = $80
+C4 = $77
+
+C1-C4 = +$3/bbl
+```
+
+C1 is above C4, so the near part of the curve is priced higher than the later part.
+
+The project uses a simple teaching rule:
+
+```text
+C1-C4 > +$0.25/bbl  -> backwardation
+C1-C4 < -$0.25/bbl  -> contango
+between those values -> relatively flat
 ```
 
 In plain English:
 
-- **Backwardation** means nearby futures are priced above later futures.
-- **Contango** means later futures are priced above nearby futures.
-- **Flat** means the price difference is small.
+- **Backwardation:** nearby futures are above later futures.
+- **Contango:** later futures are above nearby futures.
+- **Flat:** the price difference is small.
 
-The saved EIA snapshot covers January 2015 through April 2024. In that sample, 48 months are classified as backwardation, 54 as contango, and 10 as flat under the simple +/- $0.25/bbl rule.
+The $0.25 threshold is only a setting used by this project. It is not a universal market rule.
+
+The saved EIA snapshot covers January 2015 through April 2024. Under the project's simple threshold, the sample contains 48 backwardation months, 54 contango months, and 10 flat months.
 
 ![WTI C1-C4 spread history](outputs/term_structure_c1_c4_spread.svg)
 
-The code also selects the strongest backwardation and contango examples in the sample so the two curve shapes can be seen directly.
+The project also plots one strong backwardation example and one strong contango example so the curve shapes can be seen directly.
 
 ![WTI curve-shape examples](outputs/term_structure_curve_examples.svg)
 
-This is descriptive market-structure analysis, not a claim that backwardation is automatically bullish or contango is automatically bearish.
+This module is **descriptive**, not a trading signal. Backwardation does not automatically mean WTI will rise, and contango does not automatically mean WTI will fall.
 
-The purpose is to make the hedge project more realistic. A producer has future production arriving in different months, so a professional hedge program eventually needs to think about **which futures delivery month best matches which physical production month**.
+Why does this matter to a producer?
 
-For the complete beginner walkthrough, including every formula, example, output file, and an interview-ready explanation, see:
+A producer has oil arriving in different future months. A more realistic hedge program therefore needs to think about **which futures delivery month matches which physical production month**, rather than treating WTI as one single price.
 
-**[Module 2 - WTI Futures Term Structure](outputs/TERM_STRUCTURE_README.md)**
+For the complete step-by-step beginner lesson, including the math, common mistakes, output files, and interview explanation, read:
 
-Run the module with:
+**[Module 2 - Beginner WTI Futures Curve Walkthrough](outputs/TERM_STRUCTURE_README.md)**
+
+There is also a separate beginner notebook:
+
+**[WTI Term Structure Beginner Walkthrough](notebooks/WTI_Term_Structure_Beginner_Walkthrough.ipynb)**
+
+Run the teaching script with:
 
 ```bash
 python run_term_structure.py
@@ -348,14 +369,22 @@ Module 2 uses EIA historical Contract 1-4 WTI futures data. EIA notes that this 
 | Volatility | How much a price or revenue series moves around. |
 | Stress test | A test of what happens during a large or unfavorable market move. |
 | Continuous futures series | A price history created by linking multiple futures contracts over time. |
-| Futures curve | Several futures prices lined up by delivery month. |
-| Term structure | Another name for how futures prices are arranged across delivery dates. |
-| Front / near contract | The nearest delivery contract in the curve. |
-| Deferred contract | A futures contract with delivery farther in the future. |
-| Calendar spread | The price difference between two futures delivery months. |
-| Backwardation | A curve where nearby futures are priced above later futures. |
-| Contango | A curve where later futures are priced above nearby futures. |
-| Curve slope | A simple measure of how quickly prices rise or fall across delivery months. |
+| Delivery month | The month tied to a particular futures contract. |
+| Futures curve | Several futures prices arranged from nearer delivery to later delivery. |
+| Term structure | Another name for the futures curve. |
+| C1 | The nearest delivery position in the EIA historical series. The exact contract represented by C1 changes through time. |
+| C2 / C3 / C4 | The next three delivery positions after C1. |
+| Front / near contract | The nearest futures delivery position. |
+| Deferred contract | A futures contract with delivery farther into the future. |
+| Calendar spread | The price difference between two futures delivery positions. In this project, C1-C4 means C1 price minus C4 price. |
+| Positive C1-C4 spread | C1 is priced above C4. |
+| Negative C1-C4 spread | C1 is priced below C4. |
+| Backwardation | Nearby futures are priced above later futures. |
+| Contango | Later futures are priced above nearby futures. |
+| Flat curve | Nearby and later prices are very close under the project's chosen threshold. |
+| Curve slope | A simple measure of how much the curve rises or falls across delivery positions. |
+| Curve regime | The project's simple label: backwardation, contango, or flat. |
+| Threshold | A cutoff used by the project to assign a label. Module 2 uses +/- $0.25/bbl. |
 | Prompt barrels | Physical oil needed or delivered in the near term. |
 | Carry | The economics of holding a commodity through time, including storage and financing. |
 | Roll | Moving a futures position from an expiring contract into a later contract. |
