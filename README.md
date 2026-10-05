@@ -1,494 +1,298 @@
-# WTI Producer Hedge Simulator
+# WTI Producer Hedging & Market Risk Analytics
 
-A Python project that models how a crude oil producer can use WTI futures to reduce price risk on future production.
+[![tests](https://github.com/akilatrades/wti-producer-hedge-simulator/actions/workflows/tests.yml/badge.svg)](https://github.com/akilatrades/wti-producer-hedge-simulator/actions/workflows/tests.yml)
 
-The example assumes the producer expects to sell 100,000 barrels of crude oil each month. Because that oil will be sold later, the final selling price is still unknown. If oil prices fall before the sale, revenue falls with them.
+Python-based analysis of crude-oil producer price exposure, WTI futures hedging, Midland-Cushing basis risk, hedge-ratio stability, and WTI term structure.
 
-This project looks at four questions:
+The project is designed as a compact energy-risk research framework: identify a physical exposure, apply a derivative hedge, measure residual risk, stress the assumptions, and validate the model.
 
-1. How much can a futures hedge reduce that price risk?
-2. What happens when Midland and Cushing prices move differently?
-3. Can historical spot and futures data help estimate a better hedge size?
-4. What does the WTI futures curve tell us about prices across delivery months?
+> **One-line summary:** model a producer's WTI exposure and evaluate how fixed and statistically estimated futures hedges change revenue volatility, tail risk, basis exposure, and contract-level hedge requirements.
 
-This is an ongoing project. The model and documentation will continue to be updated as new ideas, tests, and improvements are added.
+## Executive summary
 
-## 30-second summary
+The base case assumes **100,000 barrels of expected monthly production** and compares short NYMEX WTI futures hedges from 0% to 100%.
 
-A producer that expects to sell oil in the future is exposed to falling prices. Short WTI futures can offset part of that risk.
+Historical saved results currently show:
 
-Using historical data from February 2015 through July 2026, the model compares several hedge levels:
-
-| Hedge ratio | CL contracts short | Revenue-surprise std. dev. | Hedge effectiveness |
-|---:|---:|---:|---:|
-| 0% | 0 | $711,294 | 0.0% |
-| 25% | 25 | $540,295 | 42.3% |
-| 50% | 50 | $373,697 | 72.4% |
-| 75% | 75 | $221,653 | 90.3% |
-| 100% | 100 | $142,693 | 96.0% |
-
-In this sample, a 75% hedge reduces the variance of monthly revenue surprise by 90.3%. A 100% hedge reduces it by 96.0%.
+| Metric | Result |
+|---|---:|
+| Unhedged revenue-surprise volatility | $711,294 |
+| 75% hedge effectiveness | 90.3% |
+| 100% hedge effectiveness | 96.0% |
+| Static minimum-variance hedge ratio | 1.016 |
+| Spot/futures monthly-change correlation | 0.983 |
+| Rounded minimum-variance implementation | 102 CL contracts |
+| Rounded minimum-variance variance reduction | 96.6% |
 
 ![Hedge effectiveness](outputs/hedge_effectiveness.svg)
 
-The model also tests Midland/Cushing basis risk, estimates a minimum-variance hedge ratio from historical spot and futures price changes, and includes WTI futures-curve analysis using the first four historical delivery positions.
+These are historical model results, not hedge recommendations. A real producer would also consider production uncertainty, basis exposure, liquidity, margin, hedge limits, accounting treatment, and internal risk policy.
 
-## What is a futures contract?
+## What the project covers
 
-A futures contract is a standardized contract tied to the price of an asset for a future delivery month.
+### 1. Producer flat-price hedge
 
-For this project, the asset is WTI crude oil.
+Compares 0%, 25%, 50%, 75%, and 100% futures hedges and measures:
 
-WTI crude oil futures trade under the ticker CL on NYMEX/CME. One CL contract represents 1,000 barrels of crude oil.
+- physical revenue,
+- futures P&L,
+- hedged revenue,
+- residual revenue surprise,
+- hedge effectiveness.
 
-If CL is trading at $75 per barrel, one contract represents:
+### 2. Market-risk metrics
 
-```text
-1,000 barrels × $75 = $75,000 of crude oil value
-```
+Adds a risk-manager view of the same hedge strategies:
 
-Futures are margined products, so a trader does not pay the full $75,000 to enter the position. Instead, collateral is posted to support the trade.
+- monthly and annualized volatility,
+- 95% and 99% historical Value at Risk,
+- Expected Shortfall,
+- downside deviation,
+- worst historical modeled loss.
 
-WTI futures are physically deliverable at Cushing, Oklahoma. Most financial traders close or roll their positions before delivery.
+### 3. P&L attribution
 
-CME contract overview:  
-https://www.cmegroup.com/education/courses/event-contracts-underlying-markets/wti-overview
-
-## What does hedging mean?
-
-Hedging means taking one position to reduce the risk of another.
-
-An oil producer is already exposed to oil prices because it owns future production.
-
-Higher oil prices help the producer. Lower oil prices hurt the producer.
-
-To reduce the downside from falling prices, the producer can short WTI futures.
+Separates the result into:
 
 ```text
-Physical oil:
-price up   -> physical revenue rises
-price down -> physical revenue falls
-
-Short futures:
-price up   -> futures position loses
-price down -> futures position gains
+Physical flat-price effect
++ Futures hedge effect
+= Residual flat-price result
 ```
 
-The futures position is not judged by itself. The important result is what happens after futures P&L is combined with physical oil revenue.
+The objective is to explain **why** the hedge result moved, not only whether it was positive or negative.
 
-## A simple hedge example
+### 4. Midland-Cushing basis risk
 
-Assume the producer expects to sell 100,000 barrels next month and WTI is trading at $75 per barrel.
+Models the residual location risk created when a producer sells Midland crude but hedges with Cushing-linked WTI futures.
 
-If oil falls to $60 with no hedge, the producer loses $15 per barrel of value:
+![Basis risk](outputs/basis_risk_stress.svg)
+
+### 5. Minimum-variance hedge estimation
+
+Estimates:
 
 ```text
-$15 × 100,000 barrels = $1,500,000
+h* = Cov(ΔSpot, ΔFutures) / Var(ΔFutures)
 ```
 
-Now assume the producer hedges 50% of production.
-
-That equals 50,000 barrels. Since one CL contract represents 1,000 barrels, the producer shorts 50 CL contracts.
-
-If WTI falls from $75 to $60, the short futures position gains $15 per barrel on those 50,000 hedged barrels:
-
-```text
-$15 × 50,000 barrels = $750,000 futures gain
-```
-
-The physical oil is still worth less, but the futures gain offsets part of the decline.
-
-That is the basic idea behind the model.
-
-## How the model compares hedge sizes
-
-The model tests 0%, 25%, 50%, 75%, and 100% hedge ratios.
-
-A 0% hedge means the producer stays fully exposed to the market price.
-
-A 50% hedge means half of expected production is covered with futures.
-
-A 100% hedge means the full expected production amount is matched with futures.
-
-For each hedge level, the model combines:
-
-```text
-Physical oil revenue
-+
-Futures profit or loss
-=
-Total modeled revenue
-```
-
-The result is then compared with the revenue level implied by the futures price at the start of the month.
-
-The difference is called revenue surprise.
-
-A smaller revenue surprise means realized modeled revenue stayed closer to that starting benchmark.
-
-![Revenue surprise](outputs/revenue_surprise_history.svg)
-
-Hedge effectiveness measures how much the hedge reduces the variance of those revenue surprises compared with staying unhedged.
-
-In plain English, higher hedge effectiveness means more stable revenue in the model.
-
-## Using the data to estimate hedge size
-
-Fixed hedge percentages are easy to compare, but the project also estimates a minimum-variance hedge ratio.
-
-The idea is simple:
-
-> Based on how WTI spot and futures prices moved together, what hedge size would have reduced price movement the most?
-
-For this sample, the estimated ratio is 1.016.
-
-For 100,000 barrels of production, that equals about 102 CL contracts after rounding.
-
-The rounded 1.02 hedge ratio reduces monthly price-change variance by 96.6% in the historical sample.
+and compares the historical residual variance with fixed hedge ratios.
 
 ![Minimum-variance comparison](outputs/min_variance_comparison.svg)
 
-The ratio is also calculated over rolling 24-month windows.
+### 6. Model validation
 
-That result changes over time, which shows that the relationship between spot and futures prices is not constant.
+The project now tests the minimum-variance estimate using:
 
-![Rolling minimum-variance hedge ratio](outputs/rolling_min_variance_ratio.svg)
+- rolling 24-month hedge ratios,
+- walk-forward / out-of-sample testing,
+- bootstrap confidence intervals.
 
-The 102-contract result is a statistical estimate, not a recommendation to hedge more than expected production. A real company would also consider production uncertainty, hedge limits, liquidity, accounting treatment, and internal risk policy.
+The goal is to avoid presenting one in-sample hedge ratio as if it were a permanent constant.
 
+### 7. Producer hedge ladder
 
-## WTI futures curve / term structure
+Maps expected production across future months into:
 
-WTI is not one single futures price. Multiple WTI futures contracts trade at the same time, and each contract is tied to a different delivery period.
+- hedge percentages,
+- whole CL contracts,
+- hedged and unhedged barrels,
+- futures notional.
 
-When those contract prices are arranged from nearer delivery to later delivery, they form the **futures curve**, also called the **term structure**.
+This adds the contract-month dimension that a one-period hedge ratio cannot show.
 
-The historical EIA data used here contains four delivery positions:
+### 8. Production uncertainty
 
-```text
-C1 = nearest delivery position in the historical series
-C2 = next delivery position
-C3 = next delivery position after C2
-C4 = fourth delivery position
-```
+Stress-tests actual production above and below forecast production and identifies:
 
-C1 is not one permanent contract. It means the nearest delivery position at each point in the historical series, so the exact contract represented by C1 changes through time.
+- under-hedged barrels,
+- over-hedged barrels,
+- residual revenue effects.
 
-### Step 1: compare the delivery positions
+This makes production-volume risk explicit.
 
-Assume one observation has these prices:
+### 9. WTI term structure
 
-```text
-C1 = $80
-C2 = $79
-C3 = $78
-C4 = $77
-```
+Analyzes historical EIA WTI Contract 1-4 prices using:
 
-The nearer contracts are priced above the later contracts.
+- C1-C2, C1-C3, and C1-C4 spreads,
+- backwardation / contango / flat regimes,
+- curve slope,
+- curve curvature,
+- rolling z-scores,
+- historical spread percentiles.
 
-Now compare that with:
+![WTI term structure](outputs/term_structure_c1_c4_spread.svg)
 
-```text
-C1 = $70
-C2 = $71
-C3 = $72
-C4 = $73
-```
+### 10. Optional physical-market context
 
-Here, the later contracts are priced above the nearer contracts.
+A separate module can join the curve data to EIA-style variables such as:
 
-The curve analysis turns those relationships into numbers that can be tracked through time.
+- commercial crude inventories,
+- Cushing inventories,
+- refinery utilization,
+- crude production,
+- imports,
+- exports.
 
-### Step 2: calculate calendar spreads
+This module is descriptive and does not claim that one inventory print mechanically predicts the next WTI move.
 
-A **calendar spread** is the price difference between two delivery positions.
-
-The project calculates:
-
-```text
-C1-C2 spread = C1 price - C2 price
-C1-C3 spread = C1 price - C3 price
-C1-C4 spread = C1 price - C4 price
-```
-
-The main measure used here is C1-C4.
-
-Example:
+## Architecture
 
 ```text
-C1 = $80
-C4 = $77
-
-C1-C4 = $80 - $77
-      = +$3/bbl
+Public market data
+      |
+      v
+Physical exposure assumptions
+      |
+      +--> Fixed hedge ratios
+      |
+      +--> Minimum-variance hedge estimate
+      |
+      +--> Basis-risk scenarios
+      |
+      +--> Production-volume scenarios
+      |
+      +--> Multi-month hedge ladder
+      |
+      v
+Risk measurement
+      |
+      +--> Volatility / VaR / ES
+      +--> P&L attribution
+      +--> Walk-forward validation
+      +--> Bootstrap uncertainty
+      |
+      v
+WTI term-structure / physical-market context
 ```
 
-A positive result means C1 is priced above C4.
-
-Another example:
+## Repository structure
 
 ```text
-C1 = $70
-C4 = $73
-
-C1-C4 = $70 - $73
-      = -$3/bbl
+.
+├── README.md
+├── CHANGELOG.md
+├── pyproject.toml
+├── requirements.txt
+├── run_analysis.py
+├── src/
+│   ├── hedge_engine.py
+│   ├── basis_risk.py
+│   ├── min_variance.py
+│   ├── risk_metrics.py
+│   ├── pnl_attribution.py
+│   ├── hedge_ladder.py
+│   ├── scenarios.py
+│   ├── validation.py
+│   ├── term_structure.py
+│   └── fundamentals.py
+├── docs/
+│   ├── methodology.md
+│   ├── hedge_model.md
+│   ├── basis_risk.md
+│   ├── risk_metrics.md
+│   ├── hedge_book.md
+│   ├── validation.md
+│   ├── term_structure.md
+│   ├── fundamentals.md
+│   ├── data_dictionary.md
+│   ├── limitations.md
+│   └── glossary.md
+├── data/
+├── notebooks/
+├── outputs/
+└── tests/
 ```
 
-A negative result means C1 is priced below C4.
-
-### Step 3: describe the curve shape
-
-The project uses the following classification rule:
-
-```text
-C1-C4 > +$0.25/bbl  -> backwardation
-C1-C4 < -$0.25/bbl  -> contango
-between those values -> relatively flat
-```
-
-The $0.25/bbl cutoff is a project setting used to keep very small differences from being treated as meaningful curve changes. It is not a universal market rule.
-
-**Backwardation** means nearby futures are priced above later futures.
-
-```text
-C1 = $80
-C2 = $79
-C3 = $78
-C4 = $77
-```
-
-**Contango** means later futures are priced above nearby futures.
-
-```text
-C1 = $70
-C2 = $71
-C3 = $72
-C4 = $73
-```
-
-A **flat curve** means the near and later prices are close under the project's chosen threshold.
-
-These labels describe the relationship between delivery months. They are not, by themselves, forecasts that WTI must rise or fall next.
-
-### Step 4: measure the curve through time
-
-For every monthly observation, the project saves:
-
-| Field | Meaning |
-|---|---|
-| `contract_1` to `contract_4` | WTI prices for the four delivery positions |
-| `c1_c2_spread` | C1 minus C2 |
-| `c1_c3_spread` | C1 minus C3 |
-| `c1_c4_spread` | C1 minus C4 |
-| `curve_slope_per_contract` | average price change per contract step from C1 to C4 |
-| `curve_regime` | backwardation, contango, or flat |
-
-The saved EIA curve sample covers January 2015 through April 2024. Under the project's classification rule, it contains 48 backwardation months, 54 contango months, and 10 flat months.
-
-![WTI C1-C4 spread history](outputs/term_structure_c1_c4_spread.svg)
-
-The chart above is read as follows:
-
-```text
-above zero -> C1 is above C4 -> backwardation
-below zero -> C1 is below C4 -> contango
-near zero  -> C1 and C4 are close
-```
-
-The project also plots one strong backwardation observation and one strong contango observation so the actual curve shapes can be compared.
-
-![WTI curve-shape examples](outputs/term_structure_curve_examples.svg)
-
-### Why the curve matters to the producer hedge
-
-The original hedge calculation asks how much expected production should be hedged.
-
-The curve adds the time dimension.
-
-A producer may have expected production in several future months:
-
-```text
-January production
-February production
-March production
-April production
-```
-
-Those barrels do not all arrive at the same time. A more realistic hedge process therefore needs to consider which futures delivery period lines up with each physical production period.
-
-That creates additional questions:
-
-- Which futures contract best matches the month when the physical crude will be sold?
-- How different are nearby and later futures prices?
-- What happens when the curve changes shape?
-- What happens when a hedge is moved, or rolled, from one delivery contract into another?
-
-The current project does not yet model a full contract-by-contract hedge schedule. The curve analysis establishes the price structure needed to study that next.
-
-## What are Cushing and Midland?
-
-Cushing, Oklahoma is the delivery point for the NYMEX WTI futures contract and a major U.S. crude storage and pipeline hub.
-
-Midland, Texas is a major crude pricing point in the Permian Basin.
-
-Both locations are important to U.S. crude trading, but their prices do not always match.
-
-Transportation costs, pipeline capacity, storage, and local supply and demand can cause one location to trade above or below another.
-
-That price difference is called basis.
-
-```text
-Midland basis = Midland price - Cushing price
-```
-
-If Midland is $72 and Cushing is $75:
-
-```text
-$72 - $75 = -$3/bbl
-```
-
-Midland is trading $3 below Cushing.
-
-CME background on U.S. crude grades:  
-https://www.cmegroup.com/markets/energy/crude-oil/north-american-grades-futures-and-options.html
-
-## What is basis risk?
-
-A producer can hedge the overall WTI price move and still have basis risk.
-
-Suppose the producer sells crude in Midland but hedges with WTI futures tied to Cushing.
-
-The Cushing-based futures hedge may reduce the main oil-price risk, but Midland can still become cheaper relative to Cushing.
-
-That remaining location-price difference is basis risk.
-
-The project uses a simple stress test.
-
-The producer expects Midland to trade $1 below Cushing. Instead, the difference widens to $5 below Cushing.
-
-That is a $4 per barrel move against the producer:
-
-```text
-$4 × 100,000 barrels = $400,000
-```
-
-With no basis hedge, the modeled shortfall is $400,000.
-
-With a 50% basis hedge, the shortfall falls to about $200,000.
-
-In the simplified model, a full basis hedge offsets the basis move.
-
-![Midland-Cushing basis risk stress test](outputs/basis_risk_stress.svg)
-
-This is a stress-test example, not a historical Midland cash-price backtest.
-
-A basis hedge is separate from the main WTI futures hedge. The futures hedge manages the overall crude-price move. A basis instrument manages the price difference between locations.
-
-## Core math
-
-Once the setup is clear, the calculations are straightforward.
-
-```text
-Hedged barrels =
-monthly production × hedge ratio
-
-CL contracts =
-hedged barrels / 1,000
-
-Futures P&L =
-(entry futures price - exit futures price) × hedged barrels
-
-Total revenue =
-physical oil revenue + futures P&L
-```
-
-The model then compares total revenue across hedge sizes and measures how much uncertainty remains.
-
-## Why I built this
-
-I trade futures myself, so most of my experience starts with a market view: where price may go, where the trade is wrong, and how much risk to take.
-
-This project looks at futures from a different angle.
-
-For a producer, futures are not only a way to take a market view. They can also protect the economics of a physical business.
-
-Building the model helped connect futures trading with physical energy markets, hedge sizing, basis risk, and Python-based risk analysis.
-
-## Data and limitations
-
-The project uses WTI Cushing spot prices from public FRED/EIA sources and a continuous front-month WTI futures series based on Yahoo Finance ticker `CL=F`.
-
-The saved results use public copies of those series:
-
-- [WTI spot dataset](https://github.com/datasets/oil-prices)
-- [WTI futures history](https://github.com/JavierLuqueGarcia/Crude-oil-Backtest)
-
-A continuous futures series links several futures contracts together to create one long price history. That is useful for this project, but it is not the same as following the exact contract a producer would trade and roll each month.
-
-A live hedge program would also need specific contract months, roll timing, transaction costs, margin, liquidity, production changes, quality and location differences, accounting treatment, credit risk, and internal hedge limits.
-
-Module 2 uses EIA historical Contract 1-4 WTI futures data. EIA notes that this NYMEX futures history is not available after April 5, 2024, so the term-structure section is a historical research example rather than a live curve feed.
-
-<details>
-<summary><strong>Glossary</strong></summary>
-
-| Term | Plain-English meaning |
-|---|---|
-| WTI | West Texas Intermediate, a major U.S. crude-oil benchmark. |
-| CL | The ticker for NYMEX WTI crude-oil futures. One contract represents 1,000 barrels. |
-| Physical crude | The actual oil the producer owns and sells. |
-| Spot price | The current cash-market price at a specific location. |
-| Futures contract | A standardized contract tied to the price of an asset for a future delivery month. |
-| Long | A position that generally benefits when price rises. |
-| Short | A position that generally benefits when price falls. |
-| Hedge | A position used to reduce another risk. |
-| Hedge ratio | The percentage of expected production being hedged. |
-| P&L | Profit and loss. |
-| Basis | The price difference between two related crude prices or locations. |
-| Basis risk | The risk that those two prices move differently. |
-| Basis hedge | A hedge aimed at reducing the risk of that price difference. |
-| Cushing | The Oklahoma delivery and pricing hub tied to NYMEX WTI futures. |
-| Midland | A major crude-pricing location in the Permian Basin. |
-| Revenue surprise | The difference between the starting revenue benchmark and modeled realized revenue. |
-| Hedge effectiveness | How much the hedge reduced the variance of revenue surprise. |
-| Minimum-variance hedge ratio | The historical hedge ratio that minimized residual price-change variance in the model. |
-| Volatility | How much a price or revenue series moves around. |
-| Stress test | A test of what happens during a large or unfavorable market move. |
-| Continuous futures series | A price history created by linking multiple futures contracts over time. |
-| Delivery month | The month tied to a particular futures contract. |
-| Futures curve | Several futures prices arranged from nearer delivery to later delivery. |
-| Term structure | Another name for the futures curve. |
-| C1 | The nearest delivery position in the EIA historical series. The exact contract represented by C1 changes through time. |
-| C2 / C3 / C4 | The next three delivery positions after C1. |
-| Front / near contract | The nearest futures delivery position. |
-| Deferred contract | A futures contract with delivery farther into the future. |
-| Calendar spread | The price difference between two futures delivery positions. In this project, C1-C4 means C1 price minus C4 price. |
-| Positive C1-C4 spread | C1 is priced above C4. |
-| Negative C1-C4 spread | C1 is priced below C4. |
-| Backwardation | Nearby futures are priced above later futures. |
-| Contango | Later futures are priced above nearby futures. |
-| Flat curve | Nearby and later prices are very close under the project's chosen threshold. |
-| Curve slope | A simple measure of how much the curve rises or falls across delivery positions. |
-| Curve regime | The project's simple label: backwardation, contango, or flat. |
-| Threshold | A cutoff used by the project to assign a curve label. The current analysis uses +/- $0.25/bbl. |
-| Prompt barrels | Physical oil needed or delivered in the near term. |
-| Carry | The economics of holding a commodity through time, including storage and financing. |
-| Roll | Moving a futures position from an expiring contract into a later contract. |
-| Roll risk | The risk or cost created because the new futures contract may trade at a different price. |
-| ETRM | Energy Trading and Risk Management software used to track trades, positions, risk, and settlements. |
-
-</details>
-
-## Run it
+## Quick start
 
 ```bash
 python -m venv .venv
+source .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
+pytest
 python run_analysis.py
 ```
 
-Project files are organized into `src/` for the model logic, one main notebook for the worked analysis, `data/` for saved inputs, and `outputs/` for saved results and charts.
+`run_analysis.py` refreshes the core tables and charts in `outputs/`.
+
+The analysis attempts to download WTI spot and futures data. The historical EIA C1-C4 curve module uses the saved repository snapshot if the EIA table is unavailable.
+
+## Generated analytical outputs
+
+The expanded analysis can generate:
+
+- `hedge_ratio_summary.csv`
+- `monthly_analysis.csv`
+- `risk_summary.csv`
+- `pnl_attribution.csv`
+- `basis_risk_scenarios.csv`
+- `illustrative_hedge_ladder.csv`
+- `production_uncertainty_scenarios.csv`
+- `min_variance_summary.csv`
+- `rolling_min_variance_ratio.csv`
+- `walk_forward_validation.csv`
+- `bootstrap_hedge_ratio_summary.csv`
+- `term_structure_monthly.csv`
+- `term_structure_regime_behavior.csv`
+- `executive_summary.md`
+
+See [outputs/README.md](outputs/README.md) for the reporting layer.
+
+## Data
+
+The project uses public market data and saved snapshots for reproducibility.
+
+Primary sources / proxies include:
+
+- FRED / EIA WTI Cushing spot data,
+- Yahoo Finance `CL=F` as a continuous front-month WTI futures proxy,
+- EIA historical NYMEX Contract 1-4 price tables.
+
+See [data/README.md](data/README.md) for data provenance and caveats.
+
+## Documentation
+
+The README is intentionally written for a quick professional review.
+
+For the full methodology:
+
+- [Methodology](docs/methodology.md)
+- [Producer hedge model](docs/hedge_model.md)
+- [Basis risk](docs/basis_risk.md)
+- [Risk metrics](docs/risk_metrics.md)
+- [Hedge ladder](docs/hedge_book.md)
+- [Validation](docs/validation.md)
+- [Term structure](docs/term_structure.md)
+- [Physical market context](docs/fundamentals.md)
+- [Model limitations](docs/limitations.md)
+- [Glossary](docs/glossary.md)
+
+## Key limitations
+
+This is an analytical research project, not an ETRM or production hedge-management system.
+
+Important simplifications include:
+
+- continuous futures rather than exact traded contracts,
+- simplified month-end hedge timing,
+- no transaction costs or margin modeling,
+- simplified physical pricing,
+- scenario-based Midland/Cushing basis analysis,
+- no hedge-accounting or credit treatment,
+- historical rather than live C1-C4 curve data.
+
+A full discussion is in [docs/limitations.md](docs/limitations.md).
+
+## Why this project exists
+
+The project connects futures-market analysis with the economics of a physical energy business.
+
+Instead of asking only whether WTI will rise or fall, it asks:
+
+> What is the producer exposed to, which instrument offsets that risk, what remains after the hedge, and how stable is the model used to size it?
+
+That is the core risk-management problem the repository is designed to demonstrate.
 
 Educational and portfolio use only. Not investment advice.
