@@ -373,3 +373,87 @@ def select_example_curves(
     examples.index.name = "date"
 
     return examples
+
+
+def add_curve_features(
+    curve_with_metrics: pd.DataFrame,
+    zscore_window: int = 24,
+) -> pd.DataFrame:
+    """Add curvature, rolling z-score, and historical percentile features.
+
+    Run add_curve_metrics() first so c1_c4_spread and curve_regime exist.
+    """
+    required = {
+        "contract_1",
+        "contract_2",
+        "contract_3",
+        "c1_c4_spread",
+        "curve_regime",
+    }
+    missing = required.difference(curve_with_metrics.columns)
+    if missing:
+        raise ValueError(
+            "Run add_curve_metrics() first. "
+            f"Missing columns: {sorted(missing)}"
+        )
+    if zscore_window < 3:
+        raise ValueError("zscore_window must be at least 3.")
+
+    out = curve_with_metrics.copy()
+
+    # A simple near-curve butterfly / curvature measure.
+    out["curve_curvature"] = (
+        out["contract_1"]
+        - 2.0 * out["contract_2"]
+        + out["contract_3"]
+    )
+
+    spread = out["c1_c4_spread"]
+    rolling_mean = spread.rolling(zscore_window).mean()
+    rolling_std = spread.rolling(zscore_window).std(ddof=1)
+
+    out["c1_c4_rolling_mean"] = rolling_mean
+    out["c1_c4_rolling_std"] = rolling_std
+    out["c1_c4_zscore"] = (
+        (spread - rolling_mean) / rolling_std
+    )
+
+    # Expanding percentile rank uses only history available up to each row.
+    out["c1_c4_percentile"] = [
+        float(spread.iloc[: i + 1].rank(pct=True).iloc[-1])
+        for i in range(len(spread))
+    ]
+
+    return out
+
+
+def summarize_regime_behavior(
+    curve_with_features: pd.DataFrame,
+) -> pd.DataFrame:
+    """Summarize front-month behavior by term-structure regime."""
+    required = {"curve_regime", "contract_1", "c1_c4_spread"}
+    missing = required.difference(curve_with_features.columns)
+    if missing:
+        raise ValueError(f"Missing required columns: {sorted(missing)}")
+
+    out = curve_with_features.copy()
+    out["front_month_change"] = out["contract_1"].diff()
+    out["front_month_return"] = out["contract_1"].pct_change()
+
+    grouped = (
+        out.dropna(subset=["front_month_return"])
+        .groupby("curve_regime", observed=True)
+        .agg(
+            months=("curve_regime", "size"),
+            average_c1_c4_spread=("c1_c4_spread", "mean"),
+            average_front_month_return=("front_month_return", "mean"),
+            front_month_return_volatility=("front_month_return", "std"),
+            average_abs_front_month_change=(
+                "front_month_change",
+                lambda x: x.abs().mean(),
+            ),
+        )
+        .reset_index()
+    )
+
+    return grouped
