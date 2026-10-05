@@ -8,6 +8,19 @@ The project is designed as a compact energy-risk research framework: identify a 
 
 > **One-line summary:** model a producer's WTI exposure and evaluate how fixed and statistically estimated futures hedges change revenue volatility, tail risk, basis exposure, and contract-level hedge requirements.
 
+## 5-minute professional review
+
+For a quick review of the project:
+
+1. Start with the **Executive summary** below for the business question and headline results.
+2. Read the management-style [generated executive summary](outputs/executive_summary.md) for findings, residual risks, and model-use considerations.
+3. Open [01 - Hedge Effectiveness](notebooks/01_hedge_effectiveness.ipynb) to see the core producer/futures hedge problem in a short guided notebook.
+4. Review [Model limitations](docs/limitations.md) for data, model, and production-use constraints.
+5. Inspect `src/` and `tests/` for the reusable analytical code and automated validation.
+
+**Skills demonstrated:** energy-market analysis, WTI futures, commodity hedging, exposure analysis, P&L attribution, basis risk, VaR / Expected Shortfall, term structure, model validation, Python, pandas, pytest, and GitHub Actions.
+
+
 ## Executive summary
 
 The base case assumes **100,000 barrels of expected monthly production** and compares short NYMEX WTI futures hedges from 0% to 100%.
@@ -201,6 +214,7 @@ WTI term-structure / physical-market context
 │   └── glossary.md
 ├── data/
 ├── notebooks/
+│   └── archive/
 ├── outputs/
 └── tests/
 ```
