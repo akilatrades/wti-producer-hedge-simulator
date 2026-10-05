@@ -23,4 +23,7 @@ Major project upgrade focused on professional market-risk analysis and reproduci
 
 ### Documentation
 
-The top-level README is now designed for quick review by recruiters, traders, risk managers, and technical reviewers. Detailed beginner explanations and methodology were moved to `docs/`.
+- redesigned the top-level README for quick review by recruiters, traders, risk managers, and technical reviewers
+- added a five-minute professional review path and concise skills summary
+- moved the original combined notebook into `notebooks/archive/` so the guided notebooks are the canonical review path
+- kept detailed beginner explanations and methodology under `docs/`
