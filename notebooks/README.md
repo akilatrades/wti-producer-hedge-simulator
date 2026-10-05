@@ -8,6 +8,6 @@ The notebooks are arranged as a guided review of the project.
 4. `04_term_structure.ipynb` — WTI C1-C4 spreads, curve regimes, slope, curvature, and z-scores.
 5. `05_risk_and_hedge_book.ipynb` — VaR/Expected Shortfall, production uncertainty, and an illustrative hedge ladder.
 
-The original `WTI_Producer_Hedge_Simulator.ipynb` is retained as the original combined walkthrough.
+These five guided notebooks are the **canonical review path** for the current project. Each notebook answers one commercial or risk question and points back to reusable functions in `src/`.
 
-The split notebooks are intentionally shorter. Each one answers one commercial or risk question and points back to the reusable functions in `src/`.
+The original combined development notebook is retained under `notebooks/archive/` for project history, but it is not the recommended starting point for reviewing the current framework.
