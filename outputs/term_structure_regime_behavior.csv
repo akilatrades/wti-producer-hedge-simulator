@@ -1,0 +1,4 @@
+curve_regime,months,average_c1_c4_spread,average_front_month_return,front_month_return_volatility,average_abs_front_month_change
+contango,53,-1.826981,0.007582,0.163458,4.381887
+flat,10,-0.017000,-0.009712,0.063331,3.426000
+backwardation,48,2.045000,0.023565,0.074271,5.107292
