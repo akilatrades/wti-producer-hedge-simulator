@@ -1,0 +1,20 @@
+[project]
+name = "wti-producer-risk-analytics"
+version = "0.2.0"
+description = "WTI producer hedging, basis risk, term-structure, and market-risk analytics"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [{name = "Akila"}]
+keywords = [
+  "wti",
+  "crude-oil",
+  "hedging",
+  "market-risk",
+  "energy-trading",
+  "futures",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+addopts = "-q"
