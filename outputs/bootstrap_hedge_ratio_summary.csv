@@ -1,0 +1,2 @@
+point_estimate,bootstrap_mean,bootstrap_std,confidence_level,lower_bound,upper_bound,bootstrap_samples
+1.015883,1.015036,0.011942,0.95,0.991672,1.038644,5000
