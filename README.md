@@ -12,7 +12,7 @@ The project is designed as a compact energy-risk research framework: identify a 
 
 For a quick review of the project:
 
-1. Start with the **Executive summary** below for the business question and headline results.
+1. Start with **Current results** below for the business question and headline findings.
 2. Read the management-style [generated executive summary](outputs/executive_summary.md) for findings, residual risks, and model-use considerations.
 3. Open [01 - Hedge Effectiveness](notebooks/01_hedge_effectiveness.ipynb) to see the core producer/futures hedge problem in a short guided notebook.
 4. Review [Model limitations](docs/limitations.md) for data, model, and production-use constraints.
@@ -21,7 +21,7 @@ For a quick review of the project:
 **Skills demonstrated:** energy-market analysis, WTI futures, commodity hedging, exposure analysis, P&L attribution, basis risk, VaR / Expected Shortfall, term structure, model validation, Python, pandas, pytest, and GitHub Actions.
 
 
-## Executive summary
+## Current results
 
 The base case assumes **100,000 barrels of expected monthly production** and compares short NYMEX WTI futures hedges from 0% to 100%.
 
@@ -36,10 +36,13 @@ Historical saved results currently show:
 | Spot/futures monthly-change correlation | 0.983 |
 | Rounded minimum-variance implementation | 102 CL contracts |
 | Rounded minimum-variance variance reduction | 96.6% |
+| 95% bootstrap interval for hedge ratio | 0.992 to 1.039 |
+| Walk-forward residual volatility | $1.461/bbl |
+| 1.0 hedge benchmark residual volatility | $1.466/bbl |
 
 ![Hedge effectiveness](outputs/hedge_effectiveness.svg)
 
-These are historical model results, not hedge recommendations. A real producer would also consider production uncertainty, basis exposure, liquidity, margin, hedge limits, accounting treatment, and internal risk policy.
+Interpretation: the saved historical sample shows that WTI futures materially reduce modeled flat-price variability for the illustrative producer, while the minimum-variance estimate remains close to a 1.0 hedge. The bootstrap interval and walk-forward comparison suggest the estimated hedge ratio is reasonably stable in this sample, but the incremental improvement over a simple 1.0 hedge is small. These are historical model results, not hedge recommendations. A real producer would also consider production uncertainty, basis exposure, liquidity, margin, hedge limits, accounting treatment, and internal risk policy.
 
 ## What the project covers
 
