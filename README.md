@@ -23,26 +23,32 @@ For a quick review of the project:
 
 ## Current results
 
-The base case assumes **100,000 barrels of expected monthly production** and compares short NYMEX WTI futures hedges from 0% to 100%.
+The example producer is assumed to sell **100,000 barrels of oil per month**. The model tests how much price risk could have been reduced by selling WTI futures against that production.
 
-Historical saved results currently show:
-
-| Metric | Result |
+| What the result means | Result |
 |---|---:|
-| Unhedged revenue-surprise volatility | $711,294 |
-| 75% hedge effectiveness | 90.3% |
-| 100% hedge effectiveness | 96.0% |
-| Static minimum-variance hedge ratio | 1.016 |
-| Spot/futures monthly-change correlation | 0.983 |
-| Rounded minimum-variance implementation | 102 CL contracts |
-| Rounded minimum-variance variance reduction | 96.6% |
-| 95% bootstrap interval for hedge ratio | 0.992 to 1.039 |
-| Walk-forward residual volatility | $1.461/bbl |
-| 1.0 hedge benchmark residual volatility | $1.466/bbl |
+| Monthly revenue volatility with no hedge | $711,294 |
+| Risk reduction with 75% of production hedged | 90.3% |
+| Risk reduction with 100% of production hedged | 96.0% |
+| Model-estimated best hedge size | 101.6% of expected production |
+| How closely spot and futures prices moved together | 0.983 correlation |
+| Practical hedge size after rounding to whole contracts | 102 CL contracts |
+| Risk reduction using that rounded hedge | 96.6% |
+| Estimated range for the best hedge ratio | 99.2% to 103.9% |
+| Remaining price volatility using the rolling model | $1.461 per barrel |
+| Remaining price volatility using a simple 100% hedge | $1.466 per barrel |
 
 ![Hedge effectiveness](outputs/hedge_effectiveness.svg)
 
-Interpretation: the saved historical sample shows that WTI futures materially reduce modeled flat-price variability for the illustrative producer, while the minimum-variance estimate remains close to a 1.0 hedge. The bootstrap interval and walk-forward comparison suggest the estimated hedge ratio is reasonably stable in this sample, but the incremental improvement over a simple 1.0 hedge is small. These are historical model results, not hedge recommendations. A real producer would also consider production uncertainty, basis exposure, liquidity, margin, hedge limits, accounting treatment, and internal risk policy.
+### Plain-English takeaway
+
+In this historical sample, WTI futures did a very good job of reducing the producer's exposure to changes in oil prices. Hedging 75% of expected production reduced modeled price-related volatility by about **90%**, while a full hedge reduced it by about **96%**.
+
+The statistical model estimated that the lowest-volatility hedge was very close to simply hedging **100% of expected production**. Its estimate was about **101.6%**, and repeated resampling placed the likely range between roughly **99% and 104%**.
+
+The more advanced rolling test reached a similar conclusion: its remaining price volatility was only slightly lower than a simple 100% hedge. In other words, the model supports the idea that a straightforward full hedge worked nearly as well as the more complex statistical hedge in this sample.
+
+These are historical model results, not a recommendation for a real producer. A real hedging program would also have to consider production uncertainty, location differences between physical oil and the futures contract, trading costs, margin requirements, liquidity, accounting rules, and company risk limits.
 
 ## What the project covers
 
