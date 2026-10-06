@@ -1,4 +1,6 @@
-name: tests
+name: CI
+
+run-name: WTI Producer Risk Analytics - CI
 
 on:
   push:
