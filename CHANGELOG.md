@@ -1,8 +1,20 @@
 # Changelog
 
+## 1.0.0
+
+Stable v1 release. The planned core scope is complete and active feature development is paused.
+
+### Finalized
+
+- core producer-hedging, basis-risk, term-structure, risk-metric, and validation workflow
+- saved headline results and plain-language interpretation on the project landing page
+- automated validation across supported Python versions
+- version metadata aligned to the stable v1 release
+- future work reserved for maintenance, data refreshes, or clearly scoped extensions
+
 ## 0.2.0
 
-Major project upgrade focused on professional market-risk analysis and reproducibility.
+Major project upgrade focused on market-risk analysis and reproducibility.
 
 ### Added
 
@@ -23,7 +35,7 @@ Major project upgrade focused on professional market-risk analysis and reproduci
 
 ### Documentation
 
-- redesigned the top-level README for quick review by recruiters, traders, risk managers, and technical reviewers
-- added a five-minute professional review path and concise skills summary
+- redesigned the top-level README for a concise review of the business question, methods, results, and limitations
+- added a five-minute project review path and concise skills summary
 - moved the original combined notebook into `notebooks/archive/` so the guided notebooks are the canonical review path
-- kept detailed beginner explanations and methodology under `docs/`
+- kept detailed methodology and supporting explanations under `docs/`
