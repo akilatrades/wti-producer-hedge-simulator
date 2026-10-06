@@ -8,7 +8,9 @@ The project is designed as a compact energy-risk research framework: identify a 
 
 > **One-line summary:** model a producer's WTI exposure and evaluate how fixed and statistically estimated futures hedges change revenue volatility, tail risk, basis exposure, and contract-level hedge requirements.
 
-## 5-minute professional review
+> **Project status:** Version 1.0 is complete. The core analytical scope is frozen as a stable release; future changes will focus on maintenance, data refreshes, or targeted extensions when they add clear value.
+
+## 5-minute project review
 
 For a quick review of the project:
 
