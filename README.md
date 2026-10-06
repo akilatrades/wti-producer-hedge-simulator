@@ -8,7 +8,7 @@ The project is designed as a compact energy-risk research framework: identify a 
 
 > **One-line summary:** model a producer's WTI exposure and evaluate how fixed and statistically estimated futures hedges change revenue volatility, tail risk, basis exposure, and contract-level hedge requirements.
 
-> **Project status:** Version 1.0 is complete. The core analytical scope is frozen as a stable release; future changes will focus on maintenance, data refreshes, or targeted extensions when they add clear value.
+> **Status:** v1.0 complete.
 
 ## 5-minute project review
 
@@ -293,6 +293,14 @@ For the full methodology:
 - [Physical market context](docs/fundamentals.md)
 - [Model limitations](docs/limitations.md)
 - [Glossary](docs/glossary.md)
+
+## Future improvements
+
+Potential next steps include:
+
+- exact contract-month futures mapping instead of continuous futures proxies,
+- transaction-cost and margin modeling,
+- deeper physical-market integration for production, inventories, and location-specific basis.
 
 ## Key limitations
 
