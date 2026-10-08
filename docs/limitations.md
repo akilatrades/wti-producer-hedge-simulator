@@ -103,3 +103,7 @@ A production-grade commercial hedging system would require an ETRM or equivalent
 - hedge accounting.
 
 This repository is an analytical portfolio/research project rather than an ETRM.
+
+## New structure and carry modules
+
+European terminal-settled Black-76 collars, fixed-price terminal swaps, and a forward-starting storage screen are now implemented. The limitations and data boundaries for these additions are in [hedge structures](hedge_structures.md) and [storage carry](../projects/crude-storage-carry/README.md). They do not upgrade the original Yahoo proxy into dated contracts or supply Midland location data.

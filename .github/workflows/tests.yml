@@ -29,3 +29,12 @@ jobs:
 
       - name: Run tests
         run: pytest
+
+      - name: Reproduce hedge structure comparison
+        run: python run_structures.py
+
+      - name: Verify and reproduce storage carry
+        working-directory: projects/crude-storage-carry
+        run: |
+          python -m unittest -v test_model
+          python run_analysis.py

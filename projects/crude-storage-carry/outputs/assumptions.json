@@ -1,0 +1,12 @@
+{
+  "months": 3,
+  "storage_per_month": 0.5,
+  "annual_financing_rate": 0.06,
+  "annual_insurance_rate": 0.003,
+  "handling_round_trip": 0.2,
+  "input_sha256": "c26398f57ab98bf9a303547d69a0d88b18d6cc663cfe572c57d2db632ba795ff",
+  "data_class": "historical monthly average curve; assumed constant costs",
+  "sample_start": "2015-01-31",
+  "sample_end": "2024-03-31",
+  "excluded": "April 2024 partial-month data; all months thereafter unavailable"
+}
