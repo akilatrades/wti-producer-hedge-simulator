@@ -27,9 +27,7 @@ def production_volume_scenarios(
     if contract_size_bbl <= 0:
         raise ValueError("contract_size_bbl must be positive.")
 
-    contracts = int(
-        round(expected_production_bbl * hedge_ratio / contract_size_bbl)
-    )
+    contracts = int(round(expected_production_bbl * hedge_ratio / contract_size_bbl))
     hedged_bbl = contracts * contract_size_bbl
     futures_pnl = (futures_entry - futures_exit) * hedged_bbl
 
@@ -82,9 +80,7 @@ def simulate_production_uncertainty(
     shocks = rng.normal(0.0, production_std_pct, n_sims)
     actual = np.maximum(expected_production_bbl * (1 + shocks), 0.0)
 
-    contracts = int(
-        round(expected_production_bbl * hedge_ratio / contract_size_bbl)
-    )
+    contracts = int(round(expected_production_bbl * hedge_ratio / contract_size_bbl))
     hedged_bbl = contracts * contract_size_bbl
     futures_pnl = (futures_entry - futures_exit) * hedged_bbl
 

@@ -61,17 +61,13 @@ def simulate_hedge(
     out["hedged_bbl"] = hedged_bbl
 
     out["physical_revenue"] = out["spot_exit"] * production
-    out["futures_pnl"] = (
-        out["futures_entry"] - out["futures_exit"]
-    ) * hedged_bbl
+    out["futures_pnl"] = (out["futures_entry"] - out["futures_exit"]) * hedged_bbl
     out["hedged_revenue"] = out["physical_revenue"] + out["futures_pnl"]
 
     # Benchmark revenue if the full monthly volume could have been locked at
     # the prior-month futures proxy. Revenue surprise is the residual risk.
     out["benchmark_locked_revenue"] = out["futures_entry"] * production
-    out["revenue_surprise"] = (
-        out["hedged_revenue"] - out["benchmark_locked_revenue"]
-    )
+    out["revenue_surprise"] = out["hedged_revenue"] - out["benchmark_locked_revenue"]
 
     return out
 
@@ -133,9 +129,7 @@ def stress_test(
         raise ValueError("hedge_ratio must be between 0 and 1.")
 
     production = assumptions.monthly_production_bbl
-    contracts = int(
-        round(production * hedge_ratio / assumptions.contract_size_bbl)
-    )
+    contracts = int(round(production * hedge_ratio / assumptions.contract_size_bbl))
     hedged_bbl = contracts * assumptions.contract_size_bbl
 
     futures_exit = futures_entry * (1 + spot_shock_pct)

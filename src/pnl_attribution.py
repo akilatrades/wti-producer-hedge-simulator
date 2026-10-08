@@ -19,18 +19,15 @@ def attribute_flat_price(simulation: pd.DataFrame) -> pd.DataFrame:
 
     out = pd.DataFrame(index=simulation.index)
     out["physical_flat_price_effect"] = (
-        simulation["physical_revenue"]
-        - simulation["benchmark_locked_revenue"]
+        simulation["physical_revenue"] - simulation["benchmark_locked_revenue"]
     )
     out["futures_hedge_effect"] = simulation["futures_pnl"]
     out["residual_flat_price_effect"] = (
-        out["physical_flat_price_effect"]
-        + out["futures_hedge_effect"]
+        out["physical_flat_price_effect"] + out["futures_hedge_effect"]
     )
     out["reported_revenue_surprise"] = simulation["revenue_surprise"]
     out["attribution_check"] = (
-        out["residual_flat_price_effect"]
-        - out["reported_revenue_surprise"]
+        out["residual_flat_price_effect"] - out["reported_revenue_surprise"]
     )
     return out
 
@@ -50,20 +47,18 @@ def summarize_attribution(attribution: pd.DataFrame) -> dict:
         "avg_physical_flat_price_effect": float(
             attribution["physical_flat_price_effect"].mean()
         ),
-        "avg_futures_hedge_effect": float(
-            attribution["futures_hedge_effect"].mean()
-        ),
+        "avg_futures_hedge_effect": float(attribution["futures_hedge_effect"].mean()),
         "avg_residual_flat_price_effect": float(
             attribution["residual_flat_price_effect"].mean()
         ),
-        "residual_std": float(
-            attribution["residual_flat_price_effect"].std(ddof=1)
-        ),
+        "residual_std": float(attribution["residual_flat_price_effect"].std(ddof=1)),
         "max_abs_attribution_check": float(
             attribution.get(
                 "attribution_check",
                 pd.Series(0.0, index=attribution.index),
-            ).abs().max()
+            )
+            .abs()
+            .max()
         ),
     }
 
@@ -81,8 +76,7 @@ def basis_attribution(result: dict) -> dict:
         raise ValueError(f"Missing required keys: {sorted(missing)}")
 
     physical_basis_effect = (
-        result["realized_midland_basis"]
-        - result["locked_basis_per_bbl"]
+        result["realized_midland_basis"] - result["locked_basis_per_bbl"]
     ) * result["production_bbl"]
 
     basis_hedge_effect = float(result["basis_swap_pnl"])

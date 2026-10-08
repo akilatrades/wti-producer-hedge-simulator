@@ -66,49 +66,33 @@ def simulate_basis_scenario(
     contract_size = assumptions.contract_size_bbl
 
     flat_contracts = int(
-        round(
-            production
-            * basis_assumptions.flat_price_hedge_ratio
-            / contract_size
-        )
+        round(production * basis_assumptions.flat_price_hedge_ratio / contract_size)
     )
     flat_hedged_bbl = flat_contracts * contract_size
 
-    basis_hedged_bbl = (
-        production * basis_assumptions.basis_hedge_ratio
-    )
+    basis_hedged_bbl = production * basis_assumptions.basis_hedge_ratio
 
     midland_spot_exit = cushing_spot_exit + realized_midland_basis
 
     physical_revenue = midland_spot_exit * production
 
-    flat_futures_pnl = (
-        cushing_futures_entry - cushing_futures_exit
-    ) * flat_hedged_bbl
+    flat_futures_pnl = (cushing_futures_entry - cushing_futures_exit) * flat_hedged_bbl
 
     basis_swap_pnl = (
-        basis_assumptions.locked_basis_per_bbl
-        - realized_midland_basis
+        basis_assumptions.locked_basis_per_bbl - realized_midland_basis
     ) * basis_hedged_bbl
 
-    total_revenue = (
-        physical_revenue + flat_futures_pnl + basis_swap_pnl
-    )
+    total_revenue = physical_revenue + flat_futures_pnl + basis_swap_pnl
 
     benchmark_locked_revenue = (
-        cushing_futures_entry
-        + basis_assumptions.locked_basis_per_bbl
+        cushing_futures_entry + basis_assumptions.locked_basis_per_bbl
     ) * production
 
-    residual_revenue_risk = (
-        total_revenue - benchmark_locked_revenue
-    )
+    residual_revenue_risk = total_revenue - benchmark_locked_revenue
 
     return {
         "production_bbl": production,
-        "flat_price_hedge_ratio": (
-            basis_assumptions.flat_price_hedge_ratio
-        ),
+        "flat_price_hedge_ratio": (basis_assumptions.flat_price_hedge_ratio),
         "basis_hedge_ratio": basis_assumptions.basis_hedge_ratio,
         "locked_basis_per_bbl": basis_assumptions.locked_basis_per_bbl,
         "realized_midland_basis": realized_midland_basis,
@@ -126,9 +110,7 @@ def simulate_basis_scenario(
 
 
 def compare_basis_scenarios(
-    realized_basis_values: Iterable[float] = (
-        1.0, 0.0, -1.0, -3.0, -5.0, -10.0
-    ),
+    realized_basis_values: Iterable[float] = (1.0, 0.0, -1.0, -3.0, -5.0, -10.0),
     basis_hedge_ratios: Iterable[float] = (0.0, 0.50, 1.00),
     cushing_futures_entry: float = 75.0,
     cushing_futures_exit: float = 60.0,

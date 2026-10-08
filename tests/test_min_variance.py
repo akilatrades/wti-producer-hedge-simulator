@@ -14,9 +14,7 @@ def test_one_for_one_changes_produce_ratio_one():
             "futures_entry": [69.0, 70.0, 72.0, 69.0],
             "futures_exit": [70.0, 72.0, 69.0, 74.0],
         },
-        index=pd.to_datetime(
-            ["2026-01-31", "2026-02-28", "2026-03-31", "2026-04-30"]
-        ),
+        index=pd.to_datetime(["2026-01-31", "2026-02-28", "2026-03-31", "2026-04-30"]),
     )
 
     ratio = minimum_variance_hedge_ratio(market)

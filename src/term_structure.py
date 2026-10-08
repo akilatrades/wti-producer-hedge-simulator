@@ -34,8 +34,18 @@ EIA_MONTHLY_URLS = {
 }
 
 MONTH_TO_NUMBER = {
-    "Jan": 1, "Feb": 2, "Mar": 3, "Apr": 4, "May": 5, "Jun": 6,
-    "Jul": 7, "Aug": 8, "Sep": 9, "Oct": 10, "Nov": 11, "Dec": 12,
+    "Jan": 1,
+    "Feb": 2,
+    "Mar": 3,
+    "Apr": 4,
+    "May": 5,
+    "Jun": 6,
+    "Jul": 7,
+    "Aug": 8,
+    "Sep": 9,
+    "Oct": 10,
+    "Nov": 11,
+    "Dec": 12,
 }
 
 
@@ -49,11 +59,7 @@ def _flatten_columns(columns: Iterable[object]) -> list[str]:
 
     for col in columns:
         if isinstance(col, tuple):
-            pieces = [
-                str(piece).strip()
-                for piece in col
-                if str(piece) != "nan"
-            ]
+            pieces = [str(piece).strip() for piece in col if str(piece) != "nan"]
             cleaned.append(pieces[-1] if pieces else "")
         else:
             cleaned.append(str(col).strip())
@@ -85,9 +91,7 @@ def _wide_eia_table_to_monthly(
     if "Year" not in out.columns:
         raise ValueError("Could not find the Year column in the EIA table.")
 
-    available_months = [
-        month for month in MONTH_TO_NUMBER if month in out.columns
-    ]
+    available_months = [month for month in MONTH_TO_NUMBER if month in out.columns]
 
     if not available_months:
         raise ValueError("Could not find month columns in the EIA table.")
@@ -111,9 +115,7 @@ def _wide_eia_table_to_monthly(
     )
     long = long.dropna(subset=[value_name])
 
-    long["month_number"] = long["month_name"].map(
-        MONTH_TO_NUMBER
-    )
+    long["month_number"] = long["month_name"].map(MONTH_TO_NUMBER)
 
     # Use month-end dates so all four contracts can be aligned cleanly.
     long["date"] = pd.to_datetime(
@@ -166,9 +168,7 @@ def load_eia_monthly_curve(
                 break
 
         if history_table is None:
-            raise ValueError(
-                f"Could not find EIA history table for {value_name}."
-            )
+            raise ValueError(f"Could not find EIA history table for {value_name}.")
 
         pieces.append(
             _wide_eia_table_to_monthly(
@@ -178,16 +178,20 @@ def load_eia_monthly_curve(
         )
 
     # concat puts C1, C2, C3, and C4 side by side on the same date.
-    curve = pd.concat(
-        pieces,
-        axis=1,
-    ).dropna().sort_index()
+    curve = (
+        pd.concat(
+            pieces,
+            axis=1,
+        )
+        .dropna()
+        .sort_index()
+    )
 
     if start is not None:
-        curve = curve.loc[pd.Timestamp(start):]
+        curve = curve.loc[pd.Timestamp(start) :]
 
     if end is not None:
-        curve = curve.loc[:pd.Timestamp(end)]
+        curve = curve.loc[: pd.Timestamp(end)]
 
     return curve
 
@@ -228,9 +232,7 @@ def add_curve_metrics(
     missing = required.difference(curve.columns)
 
     if missing:
-        raise ValueError(
-            f"Missing required curve columns: {sorted(missing)}"
-        )
+        raise ValueError(f"Missing required curve columns: {sorted(missing)}")
 
     if flat_threshold < 0:
         raise ValueError("flat_threshold must be zero or positive.")
@@ -238,15 +240,9 @@ def add_curve_metrics(
     out = curve.copy().astype(float)
 
     # Step 1: compare C1 with each later delivery position.
-    out["c1_c2_spread"] = (
-        out["contract_1"] - out["contract_2"]
-    )
-    out["c1_c3_spread"] = (
-        out["contract_1"] - out["contract_3"]
-    )
-    out["c1_c4_spread"] = (
-        out["contract_1"] - out["contract_4"]
-    )
+    out["c1_c2_spread"] = out["contract_1"] - out["contract_2"]
+    out["c1_c3_spread"] = out["contract_1"] - out["contract_3"]
+    out["c1_c4_spread"] = out["contract_1"] - out["contract_4"]
 
     # Step 2: calculate an average price change per contract step.
     #
@@ -255,9 +251,7 @@ def add_curve_metrics(
     #
     # Notice that this slope uses C4 - C1, while the spread uses C1 - C4.
     # Their signs therefore point in opposite directions by design.
-    out["curve_slope_per_contract"] = (
-        out["contract_4"] - out["contract_1"]
-    ) / 3.0
+    out["curve_slope_per_contract"] = (out["contract_4"] - out["contract_1"]) / 3.0
 
     # Step 3: convert the C1-C4 number into a simple curve label.
     spread = out["c1_c4_spread"]
@@ -292,9 +286,7 @@ def summarize_curve_regimes(
     These are descriptive statistics. They do not rank one regime as better.
     """
     if "curve_regime" not in curve_with_metrics.columns:
-        raise ValueError(
-            "Run add_curve_metrics() before summarizing regimes."
-        )
+        raise ValueError("Run add_curve_metrics() before summarizing regimes.")
 
     grouped = (
         curve_with_metrics.groupby(
@@ -309,9 +301,7 @@ def summarize_curve_regimes(
         .reset_index()
     )
 
-    grouped["share_of_sample"] = (
-        grouped["months"] / grouped["months"].sum()
-    )
+    grouped["share_of_sample"] = grouped["months"] / grouped["months"].sum()
 
     order = pd.Categorical(
         grouped["curve_regime"],
@@ -323,11 +313,7 @@ def summarize_curve_regimes(
         ordered=True,
     )
 
-    return (
-        grouped.assign(_order=order)
-        .sort_values("_order")
-        .drop(columns="_order")
-    )
+    return grouped.assign(_order=order).sort_values("_order").drop(columns="_order")
 
 
 def select_example_curves(
@@ -344,16 +330,10 @@ def select_example_curves(
     recommendations or claims about future price direction.
     """
     if "c1_c4_spread" not in curve_with_metrics.columns:
-        raise ValueError(
-            "Run add_curve_metrics() before selecting examples."
-        )
+        raise ValueError("Run add_curve_metrics() before selecting examples.")
 
-    strongest_backwardation = (
-        curve_with_metrics["c1_c4_spread"].idxmax()
-    )
-    strongest_contango = (
-        curve_with_metrics["c1_c4_spread"].idxmin()
-    )
+    strongest_backwardation = curve_with_metrics["c1_c4_spread"].idxmax()
+    strongest_contango = curve_with_metrics["c1_c4_spread"].idxmin()
 
     examples = curve_with_metrics.loc[
         [
@@ -393,8 +373,7 @@ def add_curve_features(
     missing = required.difference(curve_with_metrics.columns)
     if missing:
         raise ValueError(
-            "Run add_curve_metrics() first. "
-            f"Missing columns: {sorted(missing)}"
+            f"Run add_curve_metrics() first. Missing columns: {sorted(missing)}"
         )
     if zscore_window < 3:
         raise ValueError("zscore_window must be at least 3.")
@@ -403,9 +382,7 @@ def add_curve_features(
 
     # A simple near-curve butterfly / curvature measure.
     out["curve_curvature"] = (
-        out["contract_1"]
-        - 2.0 * out["contract_2"]
-        + out["contract_3"]
+        out["contract_1"] - 2.0 * out["contract_2"] + out["contract_3"]
     )
 
     spread = out["c1_c4_spread"]
@@ -414,14 +391,11 @@ def add_curve_features(
 
     out["c1_c4_rolling_mean"] = rolling_mean
     out["c1_c4_rolling_std"] = rolling_std
-    out["c1_c4_zscore"] = (
-        (spread - rolling_mean) / rolling_std
-    )
+    out["c1_c4_zscore"] = (spread - rolling_mean) / rolling_std
 
     # Expanding percentile rank uses only history available up to each row.
     out["c1_c4_percentile"] = [
-        float(spread.iloc[: i + 1].rank(pct=True).iloc[-1])
-        for i in range(len(spread))
+        float(spread.iloc[: i + 1].rank(pct=True).iloc[-1]) for i in range(len(spread))
     ]
 
     return out

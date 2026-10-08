@@ -82,10 +82,7 @@ def load_curve_data():
         if not CURVE_SNAPSHOT.exists():
             raise
 
-        print(
-            "EIA curve download was unavailable; "
-            "using the saved project snapshot."
-        )
+        print("EIA curve download was unavailable; using the saved project snapshot.")
         print(f"Reason: {exc}")
 
         return pd.read_csv(
@@ -368,9 +365,7 @@ def run_min_variance_analysis(market):
                     100_000,
                     ratio,
                 ),
-                "residual_price_std": diag[
-                    "residual_price_change_std"
-                ],
+                "residual_price_std": diag["residual_price_change_std"],
                 "variance_reduction": diag["variance_reduction"],
             }
         )
@@ -402,13 +397,11 @@ def run_min_variance_analysis(market):
         index=False,
     )
 
-    bootstrap_summary, bootstrap_samples = (
-        bootstrap_minimum_variance_ratio(
-            market,
-            n_bootstrap=5_000,
-            confidence=0.95,
-            seed=42,
-        )
+    bootstrap_summary, bootstrap_samples = bootstrap_minimum_variance_ratio(
+        market,
+        n_bootstrap=5_000,
+        confidence=0.95,
+        seed=42,
     )
     bootstrap_summary.to_csv(
         OUTPUT_DIR / "bootstrap_hedge_ratio_summary.csv",
@@ -446,23 +439,15 @@ def run_curve_analysis():
         OUTPUT_DIR / "term_structure_regime_behavior.csv",
         index=False,
     )
-    examples.to_csv(
-        OUTPUT_DIR / "term_structure_example_curves.csv"
-    )
+    examples.to_csv(OUTPUT_DIR / "term_structure_example_curves.csv")
 
     make_curve_charts(curve)
 
     print("\nWTI futures-curve summary")
     display = regime_summary.copy()
-    display["share_of_sample"] = (
-        display["share_of_sample"] * 100
-    ).round(1)
-    display["average_c1_c4_spread"] = (
-        display["average_c1_c4_spread"].round(2)
-    )
-    display["average_front_month_price"] = (
-        display["average_front_month_price"].round(2)
-    )
+    display["share_of_sample"] = (display["share_of_sample"] * 100).round(1)
+    display["average_c1_c4_spread"] = display["average_c1_c4_spread"].round(2)
+    display["average_front_month_price"] = display["average_front_month_price"].round(2)
     print(display.to_string(index=False))
 
     return curve, regime_summary, regime_behavior
@@ -492,12 +477,8 @@ def run_optional_fundamentals(curve):
     combined = join_curve_and_fundamentals(curve, prepared)
     summary = summarize_fundamentals_by_regime(combined)
 
-    prepared.to_csv(
-        OUTPUT_DIR / "physical_fundamentals_features.csv"
-    )
-    combined.to_csv(
-        OUTPUT_DIR / "curve_and_fundamentals.csv"
-    )
+    prepared.to_csv(OUTPUT_DIR / "physical_fundamentals_features.csv")
+    combined.to_csv(OUTPUT_DIR / "curve_and_fundamentals.csv")
     summary.to_csv(
         OUTPUT_DIR / "fundamentals_by_curve_regime.csv",
         index=False,
@@ -512,12 +493,8 @@ def write_executive_summary(
     bootstrap_summary,
 ):
     """Write a concise management-style summary using generated results."""
-    row_75 = hedge_summary.loc[
-        hedge_summary["hedge_ratio"].sub(0.75).abs().idxmin()
-    ]
-    row_100 = hedge_summary.loc[
-        hedge_summary["hedge_ratio"].sub(1.00).abs().idxmin()
-    ]
+    row_75 = hedge_summary.loc[hedge_summary["hedge_ratio"].sub(0.75).abs().idxmin()]
+    row_100 = hedge_summary.loc[hedge_summary["hedge_ratio"].sub(1.00).abs().idxmin()]
 
     min_values = dict(
         zip(
@@ -536,14 +513,14 @@ Evaluate how WTI futures can reduce monthly price risk for an illustrative produ
 
 ## Key historical findings
 
-- 75% fixed hedge effectiveness: **{row_75['hedge_effectiveness']:.1%}** variance reduction.
-- 100% fixed hedge effectiveness: **{row_100['hedge_effectiveness']:.1%}** variance reduction.
-- Static minimum-variance hedge ratio: **{min_values['static_min_variance_hedge_ratio']:.3f}**.
-- Rounded minimum-variance implementation: **{int(min_values['rounded_cl_contracts_for_100000_bbl'])} CL contracts**.
-- Rounded minimum-variance variance reduction: **{min_values['rounded_optimal_variance_reduction']:.1%}**.
-- 95% bootstrap interval for the hedge ratio: **[{boot['lower_bound']:.3f}, {boot['upper_bound']:.3f}]**.
-- Walk-forward residual volatility using trailing estimates: **{walk['model_residual_std']:.3f} $/bbl**.
-- Walk-forward residual volatility using a 1.0 hedge benchmark: **{walk['one_to_one_residual_std']:.3f} $/bbl**.
+- 75% fixed hedge effectiveness: **{row_75["hedge_effectiveness"]:.1%}** variance reduction.
+- 100% fixed hedge effectiveness: **{row_100["hedge_effectiveness"]:.1%}** variance reduction.
+- Static minimum-variance hedge ratio: **{min_values["static_min_variance_hedge_ratio"]:.3f}**.
+- Rounded minimum-variance implementation: **{int(min_values["rounded_cl_contracts_for_100000_bbl"])} CL contracts**.
+- Rounded minimum-variance variance reduction: **{min_values["rounded_optimal_variance_reduction"]:.1%}**.
+- 95% bootstrap interval for the hedge ratio: **[{boot["lower_bound"]:.3f}, {boot["upper_bound"]:.3f}]**.
+- Walk-forward residual volatility using trailing estimates: **{walk["model_residual_std"]:.3f} $/bbl**.
+- Walk-forward residual volatility using a 1.0 hedge benchmark: **{walk["one_to_one_residual_std"]:.3f} $/bbl**.
 
 ## Risk interpretation
 
@@ -571,9 +548,7 @@ def main():
     spot, futures = load_market_data()
     market = prepare_monthly_market_data(spot, futures)
 
-    hedge_summary, simulations, risk_summary = (
-        run_hedge_analysis(market)
-    )
+    hedge_summary, simulations, risk_summary = run_hedge_analysis(market)
     run_basis_analysis()
 
     (

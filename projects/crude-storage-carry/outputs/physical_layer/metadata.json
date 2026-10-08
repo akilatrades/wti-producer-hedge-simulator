@@ -1,0 +1,10 @@
+{
+  "source": "https://www.eia.gov/dnav/pet/hist_xls/W_EPC0_SAX_YCUOK_MBBLw.xls",
+  "units": "EIA thousand barrels converted to million barrels",
+  "input_sha256": "1cda3481e498b7e67442f7fb52932e64035089e663ecadb9dde8a51eef3690a7",
+  "interpretation": "Contemporaneous descriptive association; no causality or tradable signal claimed",
+  "time_alignment": "Monthly average C1/C4 vs monthly mean weekly stocks; change uses last weekly observation each month",
+  "publication_warning": "Stock dates are week-ending dates, not release timestamps. No point-in-time prediction or trading backtest.",
+  "carry_stock_change_correlation": 0.367130731858897,
+  "correlation_excluding_2020": 0.26835906838284096
+}
