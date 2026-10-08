@@ -1,11 +1,12 @@
 """Run from this directory. Uses the committed EIA historical monthly snapshot."""
 
-import json
 import hashlib
+import json
 from dataclasses import asdict
 from pathlib import Path
-import pandas as pd
+
 import matplotlib.pyplot as plt
+import pandas as pd
 from model import CarryCosts, storage_economics
 
 

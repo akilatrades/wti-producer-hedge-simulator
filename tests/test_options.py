@@ -1,6 +1,8 @@
 import unittest
-import numpy as np
 from math import exp
+
+import numpy as np
+
 from src.options import black76, costless_ceiling, producer_revenues
 
 

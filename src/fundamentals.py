@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import pandas as pd
 
-
 FUNDAMENTAL_COLUMNS = (
     "commercial_crude_stocks_kb",
     "cushing_stocks_kb",
