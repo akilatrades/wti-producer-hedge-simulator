@@ -6,3 +6,4 @@ pandas-datareader>=0.10
 jupyter>=1.0
 lxml>=5.0
 pytest>=8.0
+scipy>=1.13
