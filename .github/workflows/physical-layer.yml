@@ -1,4 +1,4 @@
-name: Save Cushing inventory comparison
+name: Save monthly Cushing inventory comparison
 on:
   workflow_dispatch:
   push:

@@ -23,7 +23,9 @@ def align_monthly(carry, stocks):
                             "weekly_observations": grouped.count()})
     monthly["stock_change_million_bbl"] = monthly.last_stocks_million_bbl.diff()
     carry = carry.copy()
-    carry["date"] = pd.to_datetime(carry.date)
+    carry["date"] = pd.to_datetime(carry.date).dt.to_period("M").dt.to_timestamp()
+    if carry.date.duplicated().any():
+        raise ValueError("Only one carry observation per month is allowed")
     joined = carry.set_index("date").join(monthly, how="left")
     if joined.isna().any().any() or (joined.weekly_observations < 4).any():
         raise ValueError("Missing inventory coverage; do not interpolate")
