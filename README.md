@@ -60,3 +60,5 @@ A hedge ratio near one is a useful sanity check when both sides reference Cushin
 The next improvement is an observed Midland–Cushing series and monthly average-price settlement, followed by volume, margin and credit constraints. Black-76 here prices European terminal-settled options with positive forward prices. It does not price American exercise or averaging, and it cannot handle negative forwards. The expiry payoff stress can still show negative terminal prices.
 
 Public and synthetic research inputs only; no employer or client data. See [limitations](docs/limitations.md).
+
+The [storage project now includes observed Cushing inventories](projects/crude-storage-carry/README.md): 10 of 12 months with carry covering assumed costs coincided with stock builds, versus 46 of 99 other months. This is a descriptive monthly comparison, not a trading signal.
