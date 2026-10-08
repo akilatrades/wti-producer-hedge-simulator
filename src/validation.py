@@ -31,7 +31,7 @@ def walk_forward_min_variance(
 
     rows = []
     for test_idx in range(window, len(changes)):
-        train = changes.iloc[test_idx - window:test_idx]
+        train = changes.iloc[test_idx - window : test_idx]
         test = changes.iloc[test_idx]
         ratio = _ratio_from_changes(train)
 
@@ -46,8 +46,7 @@ def walk_forward_min_variance(
                     test["spot_change"] - ratio * test["futures_change"]
                 ),
                 "one_to_one_residual": float(
-                    test["spot_change"]
-                    - benchmark_ratio * test["futures_change"]
+                    test["spot_change"] - benchmark_ratio * test["futures_change"]
                 ),
             }
         )
@@ -68,15 +67,9 @@ def summarize_walk_forward(results: pd.DataFrame) -> dict:
 
     return {
         "test_observations": int(len(results)),
-        "average_estimated_hedge_ratio": float(
-            results["estimated_hedge_ratio"].mean()
-        ),
-        "model_residual_std": float(
-            results["model_residual"].std(ddof=1)
-        ),
-        "one_to_one_residual_std": float(
-            results["one_to_one_residual"].std(ddof=1)
-        ),
+        "average_estimated_hedge_ratio": float(results["estimated_hedge_ratio"].mean()),
+        "model_residual_std": float(results["model_residual"].std(ddof=1)),
+        "one_to_one_residual_std": float(results["one_to_one_residual"].std(ddof=1)),
     }
 
 

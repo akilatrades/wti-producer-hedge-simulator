@@ -32,18 +32,14 @@ def prepare_fundamentals(
 
     available = [c for c in FUNDAMENTAL_COLUMNS if c in out.columns]
     if not available:
-        raise ValueError(
-            "No recognized fundamental columns were supplied."
-        )
+        raise ValueError("No recognized fundamental columns were supplied.")
 
     for col in available:
         out[col] = pd.to_numeric(out[col], errors="coerce")
         out[f"{col}_change"] = out[col].diff()
         rolling_mean = out[col].rolling(zscore_window).mean()
         rolling_std = out[col].rolling(zscore_window).std(ddof=1)
-        out[f"{col}_zscore"] = (
-            (out[col] - rolling_mean) / rolling_std
-        )
+        out[f"{col}_zscore"] = (out[col] - rolling_mean) / rolling_std
 
     if {"imports_kbd", "exports_kbd"}.issubset(out.columns):
         out["net_imports_kbd"] = out["imports_kbd"] - out["exports_kbd"]
@@ -76,17 +72,10 @@ def summarize_fundamentals_by_regime(
     if "curve_regime" not in combined.columns:
         raise ValueError("combined data must include curve_regime.")
 
-    numeric = [
-        c for c in FUNDAMENTAL_COLUMNS
-        if c in combined.columns
-    ]
+    numeric = [c for c in FUNDAMENTAL_COLUMNS if c in combined.columns]
     if "net_imports_kbd" in combined.columns:
         numeric.append("net_imports_kbd")
     if not numeric:
         raise ValueError("No fundamental columns available to summarize.")
 
-    return (
-        combined.groupby("curve_regime", observed=True)[numeric]
-        .mean()
-        .reset_index()
-    )
+    return combined.groupby("curve_regime", observed=True)[numeric].mean().reset_index()

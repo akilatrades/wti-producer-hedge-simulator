@@ -31,9 +31,7 @@ def build_hedge_ladder(
     out["expected_production_bbl"] = pd.to_numeric(
         out["expected_production_bbl"], errors="raise"
     )
-    out["hedge_ratio"] = pd.to_numeric(
-        out["hedge_ratio"], errors="raise"
-    )
+    out["hedge_ratio"] = pd.to_numeric(out["hedge_ratio"], errors="raise")
 
     if (out["expected_production_bbl"] < 0).any():
         raise ValueError("expected_production_bbl cannot be negative.")
@@ -41,26 +39,20 @@ def build_hedge_ladder(
         raise ValueError("hedge_ratio must be between 0 and 1.")
 
     raw_contracts = (
-        out["expected_production_bbl"]
-        * out["hedge_ratio"]
-        / contract_size_bbl
+        out["expected_production_bbl"] * out["hedge_ratio"] / contract_size_bbl
     )
     out["contracts_short"] = np.rint(raw_contracts).astype(int)
     out["hedged_bbl"] = out["contracts_short"] * contract_size_bbl
-    out["unhedged_bbl"] = (
-        out["expected_production_bbl"] - out["hedged_bbl"]
-    ).clip(lower=0)
-    out["overhedged_bbl"] = (
-        out["hedged_bbl"] - out["expected_production_bbl"]
-    ).clip(lower=0)
+    out["unhedged_bbl"] = (out["expected_production_bbl"] - out["hedged_bbl"]).clip(
+        lower=0
+    )
+    out["overhedged_bbl"] = (out["hedged_bbl"] - out["expected_production_bbl"]).clip(
+        lower=0
+    )
 
     if "futures_price" in out.columns:
-        out["futures_price"] = pd.to_numeric(
-            out["futures_price"], errors="raise"
-        )
-        out["hedge_notional"] = (
-            out["hedged_bbl"] * out["futures_price"]
-        )
+        out["futures_price"] = pd.to_numeric(out["futures_price"], errors="raise")
+        out["hedge_notional"] = out["hedged_bbl"] * out["futures_price"]
 
     return out.sort_values("production_month").reset_index(drop=True)
 
