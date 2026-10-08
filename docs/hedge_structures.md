@@ -10,11 +10,11 @@ The collar ceiling solves Black-76 call premium = put premium. The three-way cei
 
 For positive F,K, d1=[ln(F/K)+sigma²T/2]/(sigma sqrt(T)) and d2=d1-sigma sqrt(T). Call value is exp(-rT)[F N(d1)-K N(d2)]; put follows put-call parity. Expiry and zero-vol limits are handled explicitly. Invalid prices are rejected, not clipped.
 
-`run_structures.py` saves the seeded lognormal terminal distribution summary, strikes, payoff grid, observed benchmark basis and a separate location-basis stress grid. The distribution uses zero basis and is risk neutral, so expected revenues are not forecasts. All structures share the same paths. Costs, bid/ask, credit, daily margin, volume uncertainty and average-price settlement are excluded. Costless means zero modeled inception net premium before those costs.
+`run_structures.py` saves the seeded lognormal terminal distribution summary, strikes, payoff grid, observed benchmark basis and a separate location-basis stress grid. All structures share the same risk-neutral paths with zero basis. Costless means zero modeled inception net premium before transaction and funding costs.
 
 ## Basis data boundary
 
-`outputs/monthly_analysis.csv` is the pre-existing public-source project snapshot. The new module subtracts its `futures_exit` from `spot_exit` without regenerating or reclassifying those observations. Both are monthly endpoint proxies; futures contract identity and synchronous timestamp controls are missing. Its largest spread must not be described as observed Midland basis. Location stress values (-15,-5,0,+5 USD/bbl) are explicit assumptions, not a fitted distribution.
+`outputs/monthly_analysis.csv` is the pre-existing public-source project snapshot. The new module subtracts its `futures_exit` from `spot_exit` without regenerating or reclassifying those observations. Both are monthly endpoint proxies for Cushing benchmarks. The separate location stress grid uses assumed values of -15, -5, 0 and +5 USD/bbl.
 
 ## Sources and interpretation
 
@@ -23,3 +23,5 @@ For positive F,K, d1=[ln(F/K)+sigma²T/2]/(sigma sqrt(T)) and d2=d1-sigma sqrt(T
 - [FRED DCOILWTICO](https://fred.stlouisfed.org/series/DCOILWTICO) and Yahoo CL=F underpin the original saved monthly history.
 
 The tests reconcile put-call parity, zero premium, a negative terminal payoff, swap/futures equivalence and the loss of downside protection below the sold put.
+
+See the consolidated [limitations](limitations.md) for pricing exclusions and basis-data gaps.

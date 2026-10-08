@@ -2,7 +2,7 @@
 
 How much price risk can a crude producer remove with WTI hedges, and what is left over?
 
-The original historical test puts the minimum-variance hedge ratio at **1.016**, close to a simple full hedge. That is an expected result: CL converges to deliverable WTI at Cushing at expiry, and this model uses Cushing spot as its physical-price proxy. It is not evidence of a trading edge. The useful questions are basis, uncertain production and the protection a hedge gives up in a severe selloff.
+The original historical test puts the minimum-variance hedge ratio at **1.016**, close to a simple full hedge. That is an expected result: CL converges to deliverable WTI at Cushing at expiry, and this model uses Cushing spot as its physical-price proxy. The useful questions are basis, uncertain production and the protection a hedge gives up in a severe selloff.
 
 ## What the results show
 
@@ -24,19 +24,19 @@ The new terminal-payoff comparison uses a $70 forward, a $60 put floor, 40% assu
 
 ![Producer hedge payoffs](outputs/structures/payoffs.svg)
 
-The simulated worst-5% average revenue is about **$6.00m** for the collar versus **$4.35m** for the three-way structure. Those are assumption-based, risk-neutral simulations, not historical performance or forecasts. Futures and swaps have identical terminal payoffs under this setup; their margin, funding and credit demands differ in practice.
+The simulated worst-5% average revenue is about **$6.00m** for the collar versus **$4.35m** for the three-way structure. The comparison uses a shared risk-neutral simulation. Futures and swaps have identical terminal payoffs under this setup; their margin, funding and credit demands differ in practice.
 
 [Comparison and assumptions](outputs/structures/README.md) · [Instrument methodology](docs/hedge_structures.md)
 
 ### Observed basis versus location stress
 
-The saved monthly Cushing spot minus front-month futures proxy averages $0.34/bbl, with a $1.43/bbl standard deviation across 138 observations. That includes roll/timing effects and the 2020 disruption. **It is not Midland–Cushing location basis.** The observed benchmark series and assumed location shocks are saved separately; a verified Midland history remains a data gap.
+The saved monthly Cushing spot minus front-month futures proxy averages $0.34/bbl, with a $1.43/bbl standard deviation across 138 observations. The Cushing benchmark spread includes roll/timing effects and the 2020 disruption. Location-basis scenarios are analyzed separately.
 
 [Observed benchmark basis](outputs/structures/observed_benchmark_basis.csv) · [Location stress grid](outputs/structures/basis_stress.csv)
 
 ### Crude-storage carry project
 
-[Crude-storage carry](projects/crude-storage-carry/README.md) asks when C1-to-C4 contango covers storage, financing, insurance and handling. Across 111 full historical months, 59 had positive contango but only 12 covered the default assumed costs. The project is self-contained under `projects/` and can be split into its own repository.
+[Crude-storage carry](projects/crude-storage-carry/README.md) asks when C1-to-C4 contango covers storage, financing, insurance and handling. Across 111 full historical months, 59 had positive contango but only 12 covered the default assumed costs. The physical layer finds inventory builds in 10 of those 12 months, versus 46 of 99 other months.
 
 ## Run it
 
@@ -57,8 +57,6 @@ The original notebooks and modules also cover hedge ladders, production uncertai
 
 A hedge ratio near one is a useful sanity check when both sides reference Cushing. I would spend the next data budget on physical location prices and dated contract settlements before optimizing that ratio further. A zero-premium structure is not free protection: the sold options determine where the producer is exposed again.
 
-The next improvement is an observed Midland–Cushing series and monthly average-price settlement, followed by volume, margin and credit constraints. Black-76 here prices European terminal-settled options with positive forward prices. It does not price American exercise or averaging, and it cannot handle negative forwards. The expiry payoff stress can still show negative terminal prices.
+The next improvements are an observed Midland–Cushing series, monthly average-price settlement, and volume, margin and credit constraints. The VaR companion's [April 20, 2020 explanation](https://github.com/akilatrades/energy-commodity-var-engine/blob/main/docs/backtest_diagnosis.md#april-20-2020-the-exception-to-explain-first) shows why an explicit contract-roll policy belongs ahead of further hedge-ratio optimization.
 
-Public and synthetic research inputs only; no employer or client data. See [limitations](docs/limitations.md).
-
-The [storage project now includes observed Cushing inventories](projects/crude-storage-carry/README.md): 10 of 12 months with carry covering assumed costs coincided with stock builds, versus 46 of 99 other months. This is a descriptive monthly comparison, not a trading signal.
+Data, pricing and operational boundaries are collected in [Limitations](docs/limitations.md). The storage project's assumptions and limits are documented with its results.
