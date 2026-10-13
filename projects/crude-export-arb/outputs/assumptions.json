@@ -1,0 +1,14 @@
+{
+  "pipeline_cushing_to_gulf": 1.0,
+  "terminal_and_loading": 0.5,
+  "freight_gulf_to_europe": 3.0,
+  "losses_and_insurance_rate": 0.002,
+  "annual_financing_rate": 0.06,
+  "days_in_transit": 45,
+  "brent_sha256": "5b7e2d8a2b619ee70177fe2fa8d52a973bb047765e0fe8b88af7072fd1380921",
+  "wti_sha256": "0e7cd2dbe8865a072558252a5b06b7049ce0de57138bdffb27f76da860865c59",
+  "data_class": "EIA daily spot prices averaged by month; assumed constant costs",
+  "sample_start": "2016-01",
+  "sample_end": "2026-09",
+  "excluded": "Partial month 2026-10; 2015 and earlier (US crude export ban lifted December 2015)"
+}

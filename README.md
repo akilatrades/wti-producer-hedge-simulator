@@ -38,6 +38,10 @@ The saved monthly Cushing spot minus front-month futures proxy averages $0.34/bb
 
 [Crude-storage carry](projects/crude-storage-carry/README.md) asks when C1-to-C4 contango covers storage, financing, insurance and handling. Across 111 full historical months, 59 had positive contango but only 12 covered the default assumed costs. The physical layer finds inventory builds in 10 of those 12 months, versus 46 of 99 other months.
 
+### Crude export arb project
+
+[Crude export arb](projects/crude-export-arb/README.md) asks when Brent pays for piping Cushing crude to the Gulf Coast and shipping it to Europe. Across 129 months from 2016 to September 2026, the arb was open in 44 under the base cost assumptions, yet exports kept flowing in years the screen calls closed. Treating committed pipeline tariffs as sunk lifts open months to 59.
+
 ## Run it
 
 ```bash

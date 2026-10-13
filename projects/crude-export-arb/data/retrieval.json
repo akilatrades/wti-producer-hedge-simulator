@@ -1,0 +1,13 @@
+{
+  "source": "EIA daily spot prices (Brent RBRTE, WTI Cushing RWTC) via the datasets/oil-prices GitHub mirror",
+  "urls": [
+    "https://raw.githubusercontent.com/datasets/oil-prices/main/data/brent-daily.csv",
+    "https://raw.githubusercontent.com/datasets/oil-prices/main/data/wti-daily.csv"
+  ],
+  "download_sha256": {
+    "brent": "565088f31a7cac1e037c6d58659ebddb7f7e7dc3dff198f3014635791242df5b",
+    "wti": "1f2f5b7ed1956086886e6ba5f693c1e11941e094e36c9b8e6cff108e12f7ede7"
+  },
+  "retrieved": "2026-10-13",
+  "filtered_from": "2016-01-01"
+}

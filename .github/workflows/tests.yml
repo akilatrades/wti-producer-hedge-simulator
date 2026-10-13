@@ -40,3 +40,9 @@ jobs:
           python run_analysis.py
           python physical_layer.py
           python sql_layer.py
+
+      - name: Verify and reproduce crude export arb
+        working-directory: projects/crude-export-arb
+        run: |
+          pytest test_model.py
+          python run_analysis.py
