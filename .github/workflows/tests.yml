@@ -36,6 +36,7 @@ jobs:
       - name: Verify and reproduce storage carry
         working-directory: projects/crude-storage-carry
         run: |
-          pytest test_model.py test_physical_layer.py
+          pytest test_model.py test_physical_layer.py test_sql_layer.py
           python run_analysis.py
           python physical_layer.py
+          python sql_layer.py

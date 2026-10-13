@@ -59,6 +59,23 @@ python physical_layer.py --download
 
 All inputs are committed. Outputs include the monthly decomposition, cost sensitivity and chart. This directory is self-contained for a future separate repository.
 
+## SQL version
+
+The same study is also written in SQL. [`sql_layer.py`](sql_layer.py) loads the committed EIA files into SQLite and runs three queries:
+
+| Query | What it does |
+|---|---|
+| [`net_carry.sql`](sql/net_carry.sql) | C4 minus C1, less storage, compounded financing, insurance and handling, joined to a one-row assumptions table |
+| [`monthly_inventory.sql`](sql/monthly_inventory.sql) | Weekly Cushing stocks to monthly mean levels and month-end changes, using `ROW_NUMBER` for the last weekly observation and `LAG` for the prior month |
+| [`regime_comparison.sql`](sql/regime_comparison.sql) | Joins carry to inventory and summarizes build months by regime, for all months and excluding 2020 |
+
+```bash
+pytest test_sql_layer.py
+python sql_layer.py
+```
+
+[`test_sql_layer.py`](test_sql_layer.py) checks that every SQL value matches the Python model, that the headline counts (59 contango months, 12 covering costs, 10 of 12 with builds) are reproduced, and that a month with missing inventory data fails instead of being filled in. Results are saved in [`outputs/sql`](outputs/sql).
+
 ## What I learned / what I would do differently
 
 The curve needs to pay for the whole carrying period, not just look upward sloping. I would replace constant costs with dated terminal quotes and financing assumptions, then use daily executable contract prices and actual delivery calendars.
