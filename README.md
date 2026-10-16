@@ -1,18 +1,18 @@
 # WTI producer hedge simulator
 
-How much price risk can a crude producer remove with WTI hedges, and what is left over?
+How much of a crude producer's price risk can WTI futures remove, and what is left over?
 
-The original historical test puts the minimum-variance hedge ratio at **1.016**, close to a simple full hedge. That is an expected result: CL converges to deliverable WTI at Cushing at expiry, and this model uses Cushing spot as its physical-price proxy. The useful questions are basis, uncertain production and the protection a hedge gives up in a severe selloff.
+**Short answer: almost all of the flat-price risk, and the leftovers are basis, production and the shape of the protection you chose.** The statistically best hedge ratio in the historical test came out at **1.016**, which is just a full hedge. That is the expected answer, because the futures contract settles into physical WTI at Cushing and this model uses Cushing spot as the producer's price. The interesting questions are the ones a full hedge does not answer.
 
 ## What the results show
 
-The original saved sample assumes 100,000 barrels per month. A full futures hedge reduces the variance of modeled revenue surprises by about 96%. The rolling estimated hedge leaves $1.461/bbl of residual standard deviation, versus $1.466/bbl for a fixed full hedge. That small difference is a reason to question whether the extra model complexity helps.
+For a producer selling 100,000 barrels a month, a full futures hedge removes about **96%** of the variance of revenue surprises. Re-estimating the hedge ratio every month leaves $1.461/bbl of residual standard deviation against $1.466/bbl for a fixed full hedge: a difference so small that the extra modelling is hard to justify.
 
 [Historical result tables](outputs/README.md) · [Walk-forward validation](docs/validation.md)
 
 ### Swaps and collars
 
-The new terminal-payoff comparison uses a $70 forward, a $60 put floor, 40% assumed volatility, one year to expiry and 100,000 barrels. Black-76 gives a zero-premium collar ceiling of **$85.54**. Selling a second put at $45 increases the ceiling to **$92.67**, but below $45 the producer loses dollar for dollar again.
+A producer who does not want to give up all the upside can buy a floor and pay for it by selling a ceiling. With a $70 forward, a $60 floor, 40% volatility, one year to expiry and 100,000 barrels, the ceiling that makes the collar free is **$85.54** (priced with Black-76). Selling a second put at $45 lifts the ceiling to **$92.67**, but below $45 the producer is unprotected again. The table shows what each structure pays if the price ends the year at $20.
 
 | Structure | Revenue at a $20 terminal price, zero basis |
 |---|---:|
@@ -24,23 +24,21 @@ The new terminal-payoff comparison uses a $70 forward, a $60 put floor, 40% assu
 
 ![Producer hedge payoffs](outputs/structures/payoffs.svg)
 
-The simulated worst-5% average revenue is about **$6.00m** for the collar versus **$4.35m** for the three-way structure. The comparison uses a shared risk-neutral simulation. Futures and swaps have identical terminal payoffs under this setup; their margin, funding and credit demands differ in practice.
+In the bad 5% of simulated outcomes, the collar averages **$6.00m** of revenue and the three-way structure **$4.35m**: the higher ceiling was bought with the tail. Futures and swaps pay the same at expiry here; in practice they differ in margin calls, funding and credit.
 
 [Comparison and assumptions](outputs/structures/README.md) · [Instrument methodology](docs/hedge_structures.md)
 
-### Observed basis versus location stress
+### Basis
 
-The saved monthly Cushing spot minus front-month futures proxy averages $0.34/bbl, with a $1.43/bbl standard deviation across 138 observations. The Cushing benchmark spread includes roll/timing effects and the 2020 disruption. Location-basis scenarios are analyzed separately.
+The hedge covers the futures price, not the price the producer actually gets. Over 138 months, Cushing spot minus the front-month futures proxy averaged $0.34/bbl with a $1.43/bbl standard deviation, and that is at the delivery point itself; a producer in the Permian also carries the Midland-to-Cushing spread. Location-basis scenarios are stressed separately.
 
 [Observed benchmark basis](outputs/structures/observed_benchmark_basis.csv) · [Location stress grid](outputs/structures/basis_stress.csv)
 
-### Crude-storage carry project
+### Two side projects on the physical market
 
-[Crude-storage carry](projects/crude-storage-carry/README.md) asks when C1-to-C4 contango covers storage, financing, insurance and handling. Across 111 full historical months, 59 had positive contango but only 12 covered the default assumed costs. The physical layer finds inventory builds in 10 of those 12 months, versus 46 of 99 other months.
+[Crude-storage carry](projects/crude-storage-carry/README.md): when does the futures curve pay you to store crude? The curve was upward-sloping (contango, front month to fourth) in 59 of 111 months, but only 12 of those paid for storage, financing, insurance and handling at the assumed costs. In 10 of those 12 months Cushing inventories rose, against 46 of the other 99 months, which is the behaviour you would expect if traders act on the same arithmetic.
 
-### Crude export arb project
-
-[Crude export arb](projects/crude-export-arb/README.md) asks when Brent pays for piping Cushing crude to the Gulf Coast and shipping it to Europe. Across 129 months from 2016 to September 2026, the arb was open in 44 under the base cost assumptions, yet exports kept flowing in years the screen calls closed. Treating committed pipeline tariffs as sunk lifts open months to 59.
+[Crude export arb](projects/crude-export-arb/README.md): when does Brent pay for piping Cushing crude to the Gulf Coast and shipping it to Europe? Open in 44 of 129 months (2016 to September 2026) at base costs, yet exports kept flowing in the years the screen calls closed. Treating committed pipeline tariffs as already paid lifts the count to 59, which is probably closer to how shippers see it.
 
 ## Run it
 
@@ -53,14 +51,14 @@ python -m unittest -v test_model
 python run_analysis.py
 ```
 
-The new structure and carry analyses run from committed inputs. To refresh the original spot/futures analysis, run `python run_analysis.py` from the repository root; it requires network access to FRED and Yahoo. The EIA C1–C4 snapshot ends in April 2024 because that source was discontinued; the carry study excludes the partial final month.
+The structure and carry analyses run from saved inputs. To refresh the spot and futures history, run `python run_analysis.py` from the repository root (it needs FRED and Yahoo). The EIA curve data ends in April 2024 because that series was discontinued; the carry study drops the partial final month.
 
-The original notebooks and modules also cover hedge ladders, production uncertainty, P&L attribution, term structure, bootstrap intervals and walk-forward hedge ratios. Start with [the notebook guide](notebooks/README.md) or [methodology](docs/methodology.md).
+The notebooks also cover hedge ladders, production uncertainty, P&L attribution, term structure, bootstrap intervals and walk-forward hedge ratios. Start with [the notebook guide](notebooks/README.md) or [methodology](docs/methodology.md).
 
 ## What I learned / what I would do differently
 
-A hedge ratio near one is a useful sanity check when both sides reference Cushing. I would spend the next data budget on physical location prices and dated contract settlements before optimizing that ratio further. A zero-premium structure is not free protection: the sold options determine where the producer is exposed again.
+When both sides of a hedge reference the same place, a ratio near one is the sanity check, not the finding. I would spend the next data budget on physical location prices and dated contract settlements before optimizing that ratio any further. And a "costless" collar is not free protection: the option you sold decides where you are exposed again.
 
-The next improvements are an observed Midland–Cushing series, monthly average-price settlement, and volume, margin and credit constraints. The VaR companion's [April 20, 2020 explanation](https://github.com/akilatrades/energy-commodity-var-engine/blob/main/docs/backtest_diagnosis.md#april-20-2020-the-exception-to-explain-first) shows why an explicit contract-roll policy belongs ahead of further hedge-ratio optimization.
+Next: an observed Midland-Cushing series, monthly average-price settlement the way producers actually sell, and volume, margin and credit limits. The VaR project's [April 20, 2020 note](https://github.com/akilatrades/energy-commodity-var-engine/blob/main/docs/backtest_diagnosis.md#april-20-2020-the-exception-to-explain-first) is why an explicit contract-roll policy comes before any more hedge-ratio work.
 
 Data, pricing and operational boundaries are collected in [Limitations](docs/limitations.md). The storage project's assumptions and limits are documented with its results.
