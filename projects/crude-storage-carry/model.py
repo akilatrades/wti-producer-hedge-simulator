@@ -29,13 +29,13 @@ def storage_economics(near, deferred, costs=CarryCosts()):
     storage = costs.months * costs.storage_per_month
     non_storage = financing + insurance + costs.handling_round_trip
     spread = deferred - near
-    return dict(
-        gross_spread=spread,
-        storage_cost=storage,
-        financing_cost=financing,
-        insurance_cost=insurance,
-        handling_cost=costs.handling_round_trip,
-        total_carry_cost=storage + non_storage,
-        net_carry=spread - storage - non_storage,
-        breakeven_monthly_storage=(spread - non_storage) / costs.months,
-    )
+    return {
+        "gross_spread": spread,
+        "storage_cost": storage,
+        "financing_cost": financing,
+        "insurance_cost": insurance,
+        "handling_cost": costs.handling_round_trip,
+        "total_carry_cost": storage + non_storage,
+        "net_carry": spread - storage - non_storage,
+        "breakeven_monthly_storage": (spread - non_storage) / costs.months,
+    }

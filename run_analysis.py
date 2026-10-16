@@ -548,17 +548,17 @@ def main():
     spot, futures = load_market_data()
     market = prepare_monthly_market_data(spot, futures)
 
-    hedge_summary, simulations, risk_summary = run_hedge_analysis(market)
+    hedge_summary, _simulations, _risk_summary = run_hedge_analysis(market)
     run_basis_analysis()
 
     (
         min_summary,
-        comparison,
+        _comparison,
         walk_summary,
         bootstrap_summary,
     ) = run_min_variance_analysis(market)
 
-    curve, regime_summary, regime_behavior = run_curve_analysis()
+    curve, _regime_summary, _regime_behavior = run_curve_analysis()
     run_optional_fundamentals(curve)
 
     write_executive_summary(

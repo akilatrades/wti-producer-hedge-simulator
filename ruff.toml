@@ -1,2 +1,6 @@
 line-length = 88
 target-version = "py311"
+
+[lint]
+# Default arguments are frozen dataclasses of assumptions; they cannot change between calls.
+ignore = ["B008"]

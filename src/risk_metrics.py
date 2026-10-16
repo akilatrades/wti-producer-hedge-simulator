@@ -7,8 +7,8 @@ Expected Shortfall are reported as positive loss magnitudes.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from math import sqrt
-from typing import Mapping
 
 import numpy as np
 import pandas as pd
@@ -64,7 +64,7 @@ def summarize_revenue_risk(
     worst_loss = float(max(-worst_surprise, 0.0))
 
     return {
-        "observations": int(len(series)),
+        "observations": len(series),
         "mean_revenue_surprise": float(series.mean()),
         "monthly_volatility": monthly_vol,
         "annualized_volatility": monthly_vol * sqrt(periods_per_year),

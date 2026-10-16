@@ -40,13 +40,13 @@ def main():
                 for x in prices.itertuples()
             ]
             sensitivity.append(
-                dict(
-                    storage_per_month=storage,
-                    financing_rate=rate,
-                    positive_months=sum(x > 0 for x in net),
-                    observations=len(net),
-                    mean_net_carry=sum(net) / len(net),
-                )
+                {
+                    "storage_per_month": storage,
+                    "financing_rate": rate,
+                    "positive_months": sum(x > 0 for x in net),
+                    "observations": len(net),
+                    "mean_net_carry": sum(net) / len(net),
+                }
             )
     pd.DataFrame(sensitivity).to_csv(out / "cost_sensitivity.csv", index=False)
     (out / "assumptions.json").write_text(

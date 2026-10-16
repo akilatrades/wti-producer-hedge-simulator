@@ -27,7 +27,7 @@ def prepare_fundamentals(
         out["date"] = pd.to_datetime(out["date"])
         out = out.set_index("date")
     if not isinstance(out.index, pd.DatetimeIndex):
-        raise ValueError("Fundamentals must use a DatetimeIndex or date column.")
+        raise TypeError("Fundamentals must use a DatetimeIndex or date column.")
 
     available = [c for c in FUNDAMENTAL_COLUMNS if c in out.columns]
     if not available:
@@ -49,7 +49,7 @@ def prepare_fundamentals(
 def to_monthly_fundamentals(fundamentals: pd.DataFrame) -> pd.DataFrame:
     """Convert weekly/daily physical-market observations to month-end rows."""
     if not isinstance(fundamentals.index, pd.DatetimeIndex):
-        raise ValueError("fundamentals must use a DatetimeIndex.")
+        raise TypeError("fundamentals must use a DatetimeIndex.")
     return fundamentals.sort_index().resample("ME").last()
 
 
@@ -59,7 +59,7 @@ def join_curve_and_fundamentals(
 ) -> pd.DataFrame:
     """Join monthly curve metrics with prepared physical-market context."""
     if not isinstance(curve.index, pd.DatetimeIndex):
-        raise ValueError("curve must use a DatetimeIndex.")
+        raise TypeError("curve must use a DatetimeIndex.")
     monthly = to_monthly_fundamentals(fundamentals)
     return curve.join(monthly, how="inner")
 

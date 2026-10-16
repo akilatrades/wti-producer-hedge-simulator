@@ -48,7 +48,7 @@ def hedge_ratio_diagnostics(
 
     return {
         "hedge_ratio": float(hedge_ratio),
-        "observations": int(len(changes)),
+        "observations": len(changes),
         "spot_futures_change_correlation": float(
             changes["spot_change"].corr(changes["futures_change"])
         ),
@@ -81,4 +81,4 @@ def contracts_for_hedge_ratio(
     contract_size_bbl: int = 1_000,
 ) -> int:
     """Convert a continuous hedge ratio into whole futures contracts."""
-    return int(round(monthly_production_bbl * hedge_ratio / contract_size_bbl))
+    return round(monthly_production_bbl * hedge_ratio / contract_size_bbl)

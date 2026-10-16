@@ -80,31 +80,31 @@ def main():
     ]:
         for positive, group in frame.groupby("carry_covers_costs"):
             rows.append(
-                dict(
-                    sample=sample,
-                    carry_covers_costs=bool(positive),
-                    months=len(group),
-                    build_months=int(group.stocks_build.sum()),
-                    build_share=group.stocks_build.mean(),
-                    mean_monthly_stock_change_million_bbl=group.stock_change_million_bbl.mean(),
-                    mean_stocks_million_bbl=group.mean_stocks_million_bbl.mean(),
-                )
+                {
+                    "sample": sample,
+                    "carry_covers_costs": bool(positive),
+                    "months": len(group),
+                    "build_months": int(group.stocks_build.sum()),
+                    "build_share": group.stocks_build.mean(),
+                    "mean_monthly_stock_change_million_bbl": group.stock_change_million_bbl.mean(),
+                    "mean_stocks_million_bbl": group.mean_stocks_million_bbl.mean(),
+                }
             )
     pd.DataFrame(rows).to_csv(out / "regime_comparison.csv", index=False)
-    metadata = dict(
-        source=SOURCE,
-        units="EIA thousand barrels converted to million barrels",
-        input_sha256=hashlib.sha256(data.read_bytes()).hexdigest(),
-        interpretation="Contemporaneous descriptive association; no causality or tradable signal claimed",
-        time_alignment="Monthly average C1/C4 vs monthly mean weekly stocks; change uses last weekly observation each month",
-        publication_warning="Stock dates are week-ending dates, not release timestamps. No point-in-time prediction or trading backtest.",
-        carry_stock_change_correlation=aligned.net_carry.corr(
+    metadata = {
+        "source": SOURCE,
+        "units": "EIA thousand barrels converted to million barrels",
+        "input_sha256": hashlib.sha256(data.read_bytes()).hexdigest(),
+        "interpretation": "Contemporaneous descriptive association; no causality or tradable signal claimed",
+        "time_alignment": "Monthly average C1/C4 vs monthly mean weekly stocks; change uses last weekly observation each month",
+        "publication_warning": "Stock dates are week-ending dates, not release timestamps. No point-in-time prediction or trading backtest.",
+        "carry_stock_change_correlation": aligned.net_carry.corr(
             aligned.stock_change_million_bbl
         ),
-        correlation_excluding_2020=aligned.loc[
+        "correlation_excluding_2020": aligned.loc[
             aligned.index.year != 2020, "net_carry"
         ].corr(aligned.loc[aligned.index.year != 2020, "stock_change_million_bbl"]),
-    )
+    }
     (out / "metadata.json").write_text(json.dumps(metadata, indent=2) + "\n")
     fig, axes = plt.subplots(2, 1, figsize=(10, 6), sharex=True)
     axes[0].plot(aligned.index, aligned.net_carry, color="#2563eb")

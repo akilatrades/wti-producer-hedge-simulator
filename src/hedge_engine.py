@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Iterable
 
 import numpy as np
 import pandas as pd
@@ -53,7 +53,7 @@ def simulate_hedge(
     production = assumptions.monthly_production_bbl
     contract_size = assumptions.contract_size_bbl
 
-    contracts = int(round((production * hedge_ratio) / contract_size))
+    contracts = round((production * hedge_ratio) / contract_size)
     hedged_bbl = contracts * contract_size
 
     out["hedge_ratio"] = hedge_ratio
@@ -130,7 +130,7 @@ def stress_test(
         raise ValueError("hedge_ratio must be between 0 and 1.")
 
     production = assumptions.monthly_production_bbl
-    contracts = int(round(production * hedge_ratio / assumptions.contract_size_bbl))
+    contracts = round(production * hedge_ratio / assumptions.contract_size_bbl)
     hedged_bbl = contracts * assumptions.contract_size_bbl
 
     futures_exit = futures_entry * (1 + spot_shock_pct)

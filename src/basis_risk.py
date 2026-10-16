@@ -16,8 +16,8 @@ scenarios rather than claiming a historical Midland cash-price series.
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Iterable
 
 import pandas as pd
 
@@ -65,8 +65,8 @@ def simulate_basis_scenario(
     production = assumptions.monthly_production_bbl
     contract_size = assumptions.contract_size_bbl
 
-    flat_contracts = int(
-        round(production * basis_assumptions.flat_price_hedge_ratio / contract_size)
+    flat_contracts = round(
+        production * basis_assumptions.flat_price_hedge_ratio / contract_size
     )
     flat_hedged_bbl = flat_contracts * contract_size
 

@@ -13,17 +13,17 @@ from src.options import costless_ceiling, producer_revenues
 def main():
     out = Path("outputs/structures")
     out.mkdir(parents=True, exist_ok=True)
-    config = dict(
-        forward=70.0,
-        floor=60.0,
-        subfloor=45.0,
-        maturity=1.0,
-        volatility=0.40,
-        rate=0.04,
-        barrels=100_000,
-        seed=42,
-        scenarios=100_000,
-    )
+    config = {
+        "forward": 70.0,
+        "floor": 60.0,
+        "subfloor": 45.0,
+        "maturity": 1.0,
+        "volatility": 0.40,
+        "rate": 0.04,
+        "barrels": 100_000,
+        "seed": 42,
+        "scenarios": 100_000,
+    }
     f, k, low, t, vol, r = [
         config[x]
         for x in ("forward", "floor", "subfloor", "maturity", "volatility", "rate")
@@ -40,14 +40,14 @@ def main():
     for name, values in revenues.items():
         q = np.quantile(values, 0.05)
         rows.append(
-            dict(
-                strategy=name,
-                mean_revenue=values.mean(),
-                std_revenue=values.std(ddof=1),
-                p05_revenue=q,
-                worst_5pct_mean_revenue=values[values <= q + 1e-8].mean(),
-                probability_below_6m=float(np.mean(values < 6_000_000 - 1e-6)),
-            )
+            {
+                "strategy": name,
+                "mean_revenue": values.mean(),
+                "std_revenue": values.std(ddof=1),
+                "p05_revenue": q,
+                "worst_5pct_mean_revenue": values[values <= q + 1e-8].mean(),
+                "probability_below_6m": float(np.mean(values < 6_000_000 - 1e-6)),
+            }
         )
     pd.DataFrame(rows).to_csv(out / "revenue_comparison.csv", index=False)
     grid = np.linspace(-20, 150, 400)
@@ -77,15 +77,15 @@ def main():
     basis = history.cushing_spot_minus_front_proxy
     pd.DataFrame(
         [
-            dict(
-                observations=len(basis),
-                mean=basis.mean(),
-                std=basis.std(),
-                p05=basis.quantile(0.05),
-                p95=basis.quantile(0.95),
-                minimum=basis.min(),
-                maximum=basis.max(),
-            )
+            {
+                "observations": len(basis),
+                "mean": basis.mean(),
+                "std": basis.std(),
+                "p05": basis.quantile(0.05),
+                "p95": basis.quantile(0.95),
+                "minimum": basis.min(),
+                "maximum": basis.max(),
+            }
         ]
     ).to_csv(out / "basis_summary.csv", index=False)
     stress = []
