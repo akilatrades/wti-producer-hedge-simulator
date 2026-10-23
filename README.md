@@ -6,7 +6,9 @@ How much of a crude producer's price risk can WTI futures remove, and what is le
 
 ## What the results show
 
-For a producer selling 100,000 barrels a month, a full futures hedge removes about **96%** of the variance of revenue surprises. Re-estimating the hedge ratio every month leaves $1.461/bbl of residual standard deviation against $1.466/bbl for a fixed full hedge: a difference so small that the extra modelling is hard to justify.
+For a producer selling 100,000 barrels a month, a full futures hedge removes about **98%** of the variance of revenue surprises (140 months to September 2026). Re-estimating the hedge ratio every month leaves $0.856/bbl of residual standard deviation against $0.864/bbl for a fixed full hedge: a difference so small that the extra modelling is hard to justify.
+
+Two cautions. Month-end spot and futures are now taken on the same day; an earlier version paired 31 July 2026 spot with a stale 10 July futures price, which inflated the basis and cut the measured effectiveness to 96% (corrected in October 2026). And the futures leg uses a continuous front-month proxy: WTI futures expire around the 20th, so each month-end-to-month-end change spans two contracts and includes a calendar spread a real hedger, rolling a dated contract, would not earn exactly.
 
 [Historical result tables](outputs/README.md) · [Walk-forward validation](docs/validation.md)
 
@@ -30,7 +32,7 @@ In the bad 5% of simulated outcomes, the collar averages **$6.00m** of revenue a
 
 ### Basis
 
-The hedge covers the futures price, not the price the producer actually gets. Over 138 months, Cushing spot minus the front-month futures proxy averaged $0.34/bbl with a $1.43/bbl standard deviation, and that is at the delivery point itself; a producer in the Permian also carries the Midland-to-Cushing spread. Location-basis scenarios are stressed separately.
+The hedge covers the futures price, not the price the producer actually gets. Over 140 months, Cushing spot minus the front-month futures proxy averaged $0.30/bbl with a $0.91/bbl standard deviation (median $0.01), and that is at the delivery point itself; a producer in the Permian also carries the Midland-to-Cushing spread. Location-basis scenarios are stressed separately.
 
 [Observed benchmark basis](outputs/structures/observed_benchmark_basis.csv) · [Location stress grid](outputs/structures/basis_stress.csv)
 

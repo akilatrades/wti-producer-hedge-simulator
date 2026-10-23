@@ -37,7 +37,7 @@ The summary compares out-of-sample residual volatility.
 
 ## Why this is useful
 
-Suppose a static in-sample estimate reduces variance by 96%.
+Suppose a static in-sample estimate reduces variance by 98%.
 
 That does not mean a hedge ratio estimated in real time would have delivered the same result.
 
