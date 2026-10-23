@@ -20,24 +20,33 @@ class HedgeAssumptions:
 def prepare_monthly_market_data(
     spot_daily: pd.Series,
     futures_daily: pd.Series,
+    max_stale_days: int = 5,
 ) -> pd.DataFrame:
     """Align daily WTI spot and continuous futures proxy to month-end.
 
     The physical producer is assumed to realize the month-end WTI spot price.
     The hedge is initiated at the prior month-end futures proxy and closed at
     the current month-end futures proxy.
+
+    Both prices are taken on the same day: the last date in the month on which
+    both series have a value (``price_date``). Taking each series' own last
+    value would pair a month-end spot price with a stale futures price when
+    one source stops early. A month whose last common date is more than
+    ``max_stale_days`` before month-end (an incomplete month) is dropped.
     """
-    spot = spot_daily.dropna().sort_index().astype(float)
-    fut = futures_daily.dropna().sort_index().astype(float)
+    spot = spot_daily.dropna().sort_index().astype(float).rename("spot_exit")
+    fut = futures_daily.dropna().sort_index().astype(float).rename("futures_exit")
 
-    spot_monthly = spot.resample("ME").last().rename("spot_exit")
-    fut_monthly = fut.resample("ME").last().rename("futures_exit")
-
-    df = pd.concat([spot_monthly, fut_monthly], axis=1).dropna()
+    both = pd.concat([spot, fut], axis=1, join="inner").dropna()
+    both["price_date"] = both.index
+    df = both.resample("ME").last().dropna()
+    gap = (df.index.to_series() - pd.to_datetime(df["price_date"])).dt.days
+    stale = gap > max_stale_days
+    df = df[~stale].copy()
     df["futures_entry"] = df["futures_exit"].shift(1)
     df = df.dropna()
 
-    return df[["spot_exit", "futures_entry", "futures_exit"]]
+    return df[["spot_exit", "futures_entry", "futures_exit", "price_date"]]
 
 
 def simulate_hedge(
