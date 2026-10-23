@@ -6,14 +6,14 @@ Evaluate how WTI futures can reduce monthly price risk for an illustrative produ
 
 ## Key historical findings
 
-- 75% fixed hedge effectiveness: **90.3%** variance reduction.
-- 100% fixed hedge effectiveness: **96.0%** variance reduction.
+- 75% fixed hedge effectiveness: **92.4%** variance reduction.
+- 100% fixed hedge effectiveness: **98.4%** variance reduction.
 - Static minimum-variance hedge ratio: **1.016**.
 - Rounded minimum-variance implementation: **102 CL contracts**.
-- Rounded minimum-variance variance reduction: **96.6%**.
-- 95% bootstrap interval for the hedge ratio: **[0.991672, 1.038644]**.
-- Walk-forward residual volatility using trailing estimates: **1.460704 $/bbl**.
-- Walk-forward residual volatility using a 1.0 hedge benchmark: **1.465999 $/bbl**.
+- Rounded minimum-variance variance reduction: **98.8%**.
+- 95% bootstrap interval for the hedge ratio: **[0.992, 1.037]**.
+- Walk-forward residual volatility using trailing estimates: **0.856 $/bbl**.
+- Walk-forward residual volatility using a 1.0 hedge benchmark: **0.864 $/bbl**.
 
 ## Risk interpretation
 
