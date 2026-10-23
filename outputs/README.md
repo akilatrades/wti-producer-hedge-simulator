@@ -24,11 +24,11 @@ The saved historical sample shows:
 
 | Hedge ratio | Revenue-surprise std. dev. | Hedge effectiveness |
 |---:|---:|---:|
-| 0% | $711,294 | 0.0% |
-| 25% | $540,295 | 42.3% |
-| 50% | $373,697 | 72.4% |
-| 75% | $221,653 | 90.3% |
-| 100% | $142,693 | 96.0% |
+| 0% | $712,374 | 0.0% |
+| 25% | $536,747 | 43.2% |
+| 50% | $362,991 | 74.0% |
+| 75% | $196,146 | 92.4% |
+| 100% | $90,715 | 98.4% |
 
 ## Downside risk
 
@@ -87,8 +87,8 @@ Saved static result:
 
 - minimum-variance ratio: **1.016**
 - rounded implementation: **102 CL contracts**
-- spot/futures monthly-change correlation: **0.983**
-- rounded variance reduction: **96.6%**
+- spot/futures monthly-change correlation: **0.994**
+- rounded variance reduction: **98.8%**
 
 ## Validation
 
